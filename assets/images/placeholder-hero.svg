@@ -46,9 +46,5 @@
     <path d="M 930 610 C 970 600, 1010 610, 1040 640"/>
   </g>
 
-  <!-- brand wordmark -->
-  <text x="800" y="470" font-family="Georgia, 'Noto Serif KR', serif" font-size="46" fill="#F4F1E8" text-anchor="middle" opacity="0.92" letter-spacing="2">indigo44</text>
-  <text x="800" y="512" font-family="sans-serif" font-size="16" fill="#D9CFAE" text-anchor="middle" opacity="0.65" letter-spacing="4">SUSTAINABLE LIFESTYLE</text>
-
   <text x="1560" y="870" font-family="sans-serif" font-size="14" fill="#F4F1E8" text-anchor="end" opacity="0.4">브랜드 촬영 이미지 준비중</text>
 </svg>

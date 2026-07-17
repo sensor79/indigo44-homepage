@@ -189,6 +189,31 @@ section { padding: 96px 0; }
   background: linear-gradient(180deg, rgba(28,44,76,0.12) 0%, rgba(22,40,31,0.55) 65%, rgba(18,32,25,0.82) 100%);
 }
 
+.hero-mark {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  text-align: center;
+}
+
+.hero-mark-logo {
+  width: clamp(150px, 16vw, 220px);
+  height: auto;
+  margin: 0 auto;
+  opacity: 0.94;
+  filter: drop-shadow(0 2px 18px rgba(0, 0, 0, 0.25));
+}
+
+.hero-mark-sub {
+  margin: 14px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: #D9CFAE;
+  opacity: 0.7;
+}
+
 .hero-content {
   position: relative;
   z-index: 2;
@@ -584,4 +609,8 @@ section { padding: 96px 0; }
   .impact-stats { grid-template-columns: 1fr; }
   .hero-content { padding-bottom: 48px; }
   .footer-top { flex-direction: column; }
+
+  .hero-mark { top: 40%; }
+  .hero-mark-logo { width: clamp(120px, 34vw, 170px); }
+  .hero-mark-sub { font-size: 11px; letter-spacing: 0.2em; white-space: nowrap; }
 }
