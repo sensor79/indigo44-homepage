@@ -69,6 +69,22 @@
       <div id="productList" class="admin-product-list"></div>
     </div>
 
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>FAQ</h2>
+        <button id="addFaqBtn" class="btn btn-outline btn-sm">+ FAQ 추가</button>
+      </div>
+      <div id="faqAdminList" class="admin-faq-list"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>고객 후기</h2>
+        <button id="addReviewBtn" class="btn btn-outline btn-sm">+ 후기 추가</button>
+      </div>
+      <div id="reviewAdminList" class="admin-review-list"></div>
+    </div>
+
   </section>
 
   <p id="statusMsg" class="admin-status" hidden></p>
@@ -126,6 +142,55 @@
         <button type="submit" class="btn btn-primary" id="productSaveBtn">저장</button>
       </div>
       <p id="productFormError" class="admin-error" hidden></p>
+    </form>
+  </div>
+</div>
+
+<!-- FAQ 편집 폼 (모달) -->
+<div id="faqModal" class="admin-modal" hidden>
+  <div class="admin-modal-box">
+    <h3 id="faqModalTitle">FAQ 추가</h3>
+    <form id="faqForm" class="admin-form">
+      <input type="hidden" id="faqId">
+      <label>질문<input type="text" id="faqQuestion" required></label>
+      <label>답변<textarea id="faqAnswer" rows="4" required></textarea></label>
+      <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="faqSortOrder" value="0"></label>
+      <div class="admin-modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>취소</button>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div>
+      <p id="faqFormError" class="admin-error" hidden></p>
+    </form>
+  </div>
+</div>
+
+<!-- 후기 편집 폼 (모달) -->
+<div id="reviewModal" class="admin-modal" hidden>
+  <div class="admin-modal-box">
+    <h3 id="reviewModalTitle">후기 추가</h3>
+    <form id="reviewForm" class="admin-form">
+      <input type="hidden" id="reviewId">
+      <label>작성자 (닉네임)<input type="text" id="reviewAuthor" required></label>
+      <label>후기 내용<textarea id="reviewText" rows="4" required></textarea></label>
+      <label>별점
+        <select id="reviewRating">
+          <option value="5">★★★★★ (5점)</option>
+          <option value="4">★★★★☆ (4점)</option>
+          <option value="3">★★★☆☆ (3점)</option>
+          <option value="2">★★☆☆☆ (2점)</option>
+          <option value="1">★☆☆☆☆ (1점)</option>
+        </select>
+      </label>
+      <label>후기 이미지 (선택 — 넣으면 별점 대신 이미지가 표시돼요)
+        <input type="file" id="reviewImageFile" accept="image/*">
+      </label>
+      <img id="reviewImagePreview" class="admin-image-preview" hidden>
+      <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="reviewSortOrder" value="0"></label>
+      <div class="admin-modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>취소</button>
+        <button type="submit" class="btn btn-primary" id="reviewSaveBtn">저장</button>
+      </div>
+      <p id="reviewFormError" class="admin-error" hidden></p>
     </form>
   </div>
 </div>

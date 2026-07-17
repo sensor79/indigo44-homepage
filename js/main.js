@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavToggle();
   initFaqAccordion();
   loadProducts();
+  loadFaqs();
+  loadReviews();
 });
 
 function initNavToggle() {
@@ -20,14 +22,67 @@ function initNavToggle() {
 }
 
 function initFaqAccordion() {
-  document.querySelectorAll('.faq-item').forEach(item => {
-    const question = item.querySelector('.faq-question');
-    question.addEventListener('click', () => {
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
-      if (!isOpen) item.classList.add('open');
-    });
+  const list = document.getElementById('faqList');
+  list.addEventListener('click', (e) => {
+    const question = e.target.closest('.faq-question');
+    if (!question) return;
+    const item = question.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    list.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
   });
+}
+
+async function loadFaqs() {
+  const listEl = document.getElementById('faqList');
+  const { data, error } = await supabaseClient
+    .from('faqs')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    if (error) console.error('FAQ를 불러오는 중 오류가 발생했습니다.', error);
+    listEl.innerHTML = '';
+    return;
+  }
+
+  listEl.innerHTML = data.map(faq => `
+    <div class="faq-item">
+      <button class="faq-question">${faq.question} <span class="plus">+</span></button>
+      <div class="faq-answer"><p>${faq.answer}</p></div>
+    </div>
+  `).join('');
+}
+
+async function loadReviews() {
+  const gridEl = document.getElementById('reviewGrid');
+  const { data, error } = await supabaseClient
+    .from('reviews')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('후기를 불러오는 중 오류가 발생했습니다.', error);
+    gridEl.innerHTML = '<p class="category-empty">후기를 불러오지 못했습니다.</p>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    gridEl.innerHTML = '<p class="category-empty">아직 등록된 후기가 없어요. 첫 후기를 기다리고 있어요!</p>';
+    return;
+  }
+
+  gridEl.innerHTML = data.map(review => `
+    <div class="review-card">
+      ${review.image_url ? `
+        <div class="review-img"><img src="${review.image_url}" alt="${review.author} 후기 이미지" loading="lazy"></div>
+      ` : `
+        <div class="stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+      `}
+      <p class="review-text">${review.review_text}</p>
+      <p class="review-author">${review.author}</p>
+    </div>
+  `).join('');
 }
 
 async function loadProducts() {

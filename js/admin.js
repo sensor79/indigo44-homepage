@@ -8,7 +8,7 @@ const views = {
   dashboard: document.getElementById('dashboardView'),
 };
 
-let state = { categories: [], products: [] };
+let state = { categories: [], products: [], faqs: [], reviews: [] };
 
 // 초대/복구 링크로 들어온 경우 supabase-js가 세션을 만들자마자 해시를 지워버리므로,
 // 처리되기 전에 미리 읽어둔다 (type=invite 또는 type=recovery면 비밀번호 설정 화면을 보여줘야 함).
@@ -60,7 +60,14 @@ function bindStaticEvents() {
 
   document.getElementById('categoryForm').addEventListener('submit', onCategorySubmit);
   document.getElementById('productForm').addEventListener('submit', onProductSubmit);
-  document.getElementById('productImageFile').addEventListener('change', onImageFileChange);
+  document.getElementById('productImageFile').addEventListener('change', (e) => onImageFileChange(e, 'productImagePreview'));
+
+  document.getElementById('addFaqBtn').addEventListener('click', () => openFaqModal());
+  document.getElementById('faqForm').addEventListener('submit', onFaqSubmit);
+
+  document.getElementById('addReviewBtn').addEventListener('click', () => openReviewModal());
+  document.getElementById('reviewForm').addEventListener('submit', onReviewSubmit);
+  document.getElementById('reviewImageFile').addEventListener('change', (e) => onImageFileChange(e, 'reviewImagePreview'));
 
   document.querySelectorAll('[data-close-modal]').forEach(btn => {
     btn.addEventListener('click', () => closeModals());
@@ -70,6 +77,8 @@ function bindStaticEvents() {
 function closeModals() {
   document.getElementById('categoryModal').hidden = true;
   document.getElementById('productModal').hidden = true;
+  document.getElementById('faqModal').hidden = true;
+  document.getElementById('reviewModal').hidden = true;
 }
 
 // ===== 인증 =====
@@ -114,21 +123,33 @@ async function onSetPasswordSubmit(e) {
 // ===== 데이터 로딩 =====
 
 async function loadDashboard() {
-  const [{ data: categories, error: catErr }, { data: products, error: prodErr }] = await Promise.all([
+  const [
+    { data: categories, error: catErr },
+    { data: products, error: prodErr },
+    { data: faqs, error: faqErr },
+    { data: reviews, error: reviewErr },
+  ] = await Promise.all([
     supabaseClient.from('categories').select('*').order('sort_order', { ascending: true }),
     supabaseClient.from('products').select('*').order('sort_order', { ascending: true }),
+    supabaseClient.from('faqs').select('*').order('sort_order', { ascending: true }),
+    supabaseClient.from('reviews').select('*').order('sort_order', { ascending: true }),
   ]);
 
-  if (catErr || prodErr) {
-    setStatus('데이터를 불러오지 못했습니다: ' + ((catErr || prodErr).message), true);
+  const err = catErr || prodErr || faqErr || reviewErr;
+  if (err) {
+    setStatus('데이터를 불러오지 못했습니다: ' + err.message, true);
     return;
   }
 
   state.categories = categories;
   state.products = products;
+  state.faqs = faqs;
+  state.reviews = reviews;
   renderCategoryList();
   renderCategorySelects();
   renderProductList();
+  renderFaqAdminList();
+  renderReviewAdminList();
 }
 
 // ===== 카테고리 렌더링 =====
@@ -288,10 +309,10 @@ function openProductModal(id) {
   modal.hidden = false;
 }
 
-function onImageFileChange(e) {
+function onImageFileChange(e, previewId) {
   const file = e.target.files[0];
   if (!file) return;
-  const preview = document.getElementById('productImagePreview');
+  const preview = document.getElementById(previewId);
   preview.src = URL.createObjectURL(file);
   preview.hidden = false;
 }
@@ -309,7 +330,7 @@ async function onProductSubmit(e) {
     let imageUrl = document.getElementById('productModal').dataset.currentImageUrl || '';
     const file = document.getElementById('productImageFile').files[0];
     if (file) {
-      imageUrl = await uploadProductImage(file);
+      imageUrl = await uploadImage(file);
     }
 
     const certifications = [];
@@ -347,7 +368,7 @@ async function onProductSubmit(e) {
   }
 }
 
-async function uploadProductImage(file) {
+async function uploadImage(file) {
   const ext = file.name.split('.').pop();
   const path = `${crypto.randomUUID()}.${ext}`;
   const { error } = await supabaseClient.storage.from('product-images').upload(path, file, { upsert: false });
@@ -364,5 +385,194 @@ async function deleteProduct(id) {
     return;
   }
   setStatus('제품을 삭제했어요.');
+  loadDashboard();
+}
+
+// ===== FAQ 렌더링 =====
+
+function renderFaqAdminList() {
+  const el = document.getElementById('faqAdminList');
+  el.innerHTML = '';
+
+  state.faqs.forEach(faq => {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    row.innerHTML = `
+      <div class="admin-row-main">
+        <strong>${faq.question}</strong>
+        <span class="admin-row-sub">${faq.answer}</span>
+      </div>
+      <div class="admin-row-actions">
+        <button class="btn btn-outline btn-sm" data-edit-faq="${faq.id}">수정</button>
+        <button class="btn btn-outline btn-sm" data-delete-faq="${faq.id}">삭제</button>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+
+  el.querySelectorAll('[data-edit-faq]').forEach(btn => {
+    btn.addEventListener('click', () => openFaqModal(btn.dataset.editFaq));
+  });
+  el.querySelectorAll('[data-delete-faq]').forEach(btn => {
+    btn.addEventListener('click', () => deleteFaq(btn.dataset.deleteFaq));
+  });
+}
+
+function openFaqModal(id) {
+  const modal = document.getElementById('faqModal');
+  const faq = state.faqs.find(f => f.id === id);
+  document.getElementById('faqModalTitle').textContent = faq ? 'FAQ 수정' : 'FAQ 추가';
+  document.getElementById('faqId').value = id || '';
+  document.getElementById('faqQuestion').value = faq ? faq.question : '';
+  document.getElementById('faqAnswer').value = faq ? faq.answer : '';
+  document.getElementById('faqSortOrder').value = faq ? faq.sort_order : state.faqs.length;
+  document.getElementById('faqFormError').hidden = true;
+  modal.hidden = false;
+}
+
+async function onFaqSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('faqId').value;
+  const payload = {
+    question: document.getElementById('faqQuestion').value.trim(),
+    answer: document.getElementById('faqAnswer').value.trim(),
+    sort_order: Number(document.getElementById('faqSortOrder').value) || 0,
+  };
+
+  const query = id
+    ? supabaseClient.from('faqs').update(payload).eq('id', id)
+    : supabaseClient.from('faqs').insert(payload);
+
+  const { error } = await query;
+  if (error) {
+    document.getElementById('faqFormError').textContent = '저장 실패: ' + error.message;
+    document.getElementById('faqFormError').hidden = false;
+    return;
+  }
+  closeModals();
+  setStatus('FAQ를 저장했어요.');
+  loadDashboard();
+}
+
+async function deleteFaq(id) {
+  if (!confirm('이 FAQ를 삭제할까요?')) return;
+  const { error } = await supabaseClient.from('faqs').delete().eq('id', id);
+  if (error) {
+    setStatus('FAQ 삭제 실패: ' + error.message, true);
+    return;
+  }
+  setStatus('FAQ를 삭제했어요.');
+  loadDashboard();
+}
+
+// ===== 후기 렌더링 =====
+
+function renderReviewAdminList() {
+  const el = document.getElementById('reviewAdminList');
+  el.innerHTML = '';
+
+  state.reviews.forEach(review => {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    row.innerHTML = `
+      <div class="admin-row-main admin-row-with-thumb">
+        ${review.image_url ? `<img class="admin-thumb" src="${review.image_url}" alt="${review.author}">` : ''}
+        <div>
+          <strong>${review.author}</strong> · ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+          <span class="admin-row-sub">${review.review_text}</span>
+        </div>
+      </div>
+      <div class="admin-row-actions">
+        <button class="btn btn-outline btn-sm" data-edit-review="${review.id}">수정</button>
+        <button class="btn btn-outline btn-sm" data-delete-review="${review.id}">삭제</button>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+
+  el.querySelectorAll('[data-edit-review]').forEach(btn => {
+    btn.addEventListener('click', () => openReviewModal(btn.dataset.editReview));
+  });
+  el.querySelectorAll('[data-delete-review]').forEach(btn => {
+    btn.addEventListener('click', () => deleteReview(btn.dataset.deleteReview));
+  });
+}
+
+function openReviewModal(id) {
+  const modal = document.getElementById('reviewModal');
+  const review = state.reviews.find(r => r.id === id);
+
+  document.getElementById('reviewModalTitle').textContent = review ? '후기 수정' : '후기 추가';
+  document.getElementById('reviewId').value = id || '';
+  document.getElementById('reviewAuthor').value = review ? review.author : '';
+  document.getElementById('reviewText').value = review ? review.review_text : '';
+  document.getElementById('reviewRating').value = review ? review.rating : 5;
+  document.getElementById('reviewSortOrder').value = review ? review.sort_order : state.reviews.length;
+  document.getElementById('reviewImageFile').value = '';
+  document.getElementById('reviewFormError').hidden = true;
+
+  const preview = document.getElementById('reviewImagePreview');
+  if (review && review.image_url) {
+    preview.src = review.image_url;
+    preview.hidden = false;
+  } else {
+    preview.hidden = true;
+  }
+
+  modal.dataset.currentImageUrl = (review && review.image_url) || '';
+  modal.hidden = false;
+}
+
+async function onReviewSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('reviewId').value;
+  const errEl = document.getElementById('reviewFormError');
+  const saveBtn = document.getElementById('reviewSaveBtn');
+  errEl.hidden = true;
+  saveBtn.disabled = true;
+  saveBtn.textContent = '저장 중...';
+
+  try {
+    let imageUrl = document.getElementById('reviewModal').dataset.currentImageUrl || '';
+    const file = document.getElementById('reviewImageFile').files[0];
+    if (file) {
+      imageUrl = await uploadImage(file);
+    }
+
+    const payload = {
+      author: document.getElementById('reviewAuthor').value.trim(),
+      review_text: document.getElementById('reviewText').value.trim(),
+      rating: Number(document.getElementById('reviewRating').value) || 5,
+      sort_order: Number(document.getElementById('reviewSortOrder').value) || 0,
+      image_url: imageUrl,
+    };
+
+    const query = id
+      ? supabaseClient.from('reviews').update(payload).eq('id', id)
+      : supabaseClient.from('reviews').insert(payload);
+
+    const { error } = await query;
+    if (error) throw error;
+
+    closeModals();
+    setStatus('후기를 저장했어요.');
+    loadDashboard();
+  } catch (err) {
+    errEl.textContent = '저장 실패: ' + err.message;
+    errEl.hidden = false;
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '저장';
+  }
+}
+
+async function deleteReview(id) {
+  if (!confirm('이 후기를 삭제할까요?')) return;
+  const { error } = await supabaseClient.from('reviews').delete().eq('id', id);
+  if (error) {
+    setStatus('후기 삭제 실패: ' + error.message, true);
+    return;
+  }
+  setStatus('후기를 삭제했어요.');
   loadDashboard();
 }
