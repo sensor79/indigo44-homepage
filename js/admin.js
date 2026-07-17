@@ -10,11 +10,18 @@ const views = {
 
 let state = { categories: [], products: [] };
 
+// 초대/복구 링크로 들어온 경우 supabase-js가 세션을 만들자마자 해시를 지워버리므로,
+// 처리되기 전에 미리 읽어둔다 (type=invite 또는 type=recovery면 비밀번호 설정 화면을 보여줘야 함).
+const initialLinkType = getUrlHashParam('type');
+
 document.addEventListener('DOMContentLoaded', () => {
   bindStaticEvents();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY') {
+    const needsPasswordSetup = event === 'PASSWORD_RECOVERY'
+      || (session && (initialLinkType === 'invite' || initialLinkType === 'recovery'));
+
+    if (needsPasswordSetup) {
       showView('setPassword');
     } else if (session) {
       showView('dashboard');
@@ -24,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+function getUrlHashParam(key) {
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+  return new URLSearchParams(hash).get(key);
+}
 
 function showView(name) {
   Object.entries(views).forEach(([key, el]) => { el.hidden = key !== name; });
