@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인디고44 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css?v=2">
+</head>
+<body class="admin-body">
+
+<header class="admin-header">
+  <div class="admin-header-inner">
+    <span class="admin-logo">indigo44 관리자</span>
+    <button id="logoutBtn" class="btn btn-outline btn-sm" hidden>로그아웃</button>
+  </div>
+</header>
+
+<main class="admin-main">
+
+  <!-- 로그인 화면 -->
+  <section id="loginView" class="admin-card" hidden>
+    <h1 class="admin-title">관리자 로그인</h1>
+    <p class="admin-desc">가입하신 이메일과 비밀번호로 로그인해주세요.</p>
+    <form id="loginForm" class="admin-form">
+      <label>이메일<input type="email" id="loginEmail" required autocomplete="username"></label>
+      <label>비밀번호<input type="password" id="loginPassword" required autocomplete="current-password"></label>
+      <button type="submit" class="btn btn-primary">로그인</button>
+      <p id="loginError" class="admin-error" hidden></p>
+    </form>
+  </section>
+
+  <!-- 최초 비밀번호 설정 화면 -->
+  <section id="setPasswordView" class="admin-card" hidden>
+    <h1 class="admin-title">비밀번호 설정</h1>
+    <p class="admin-desc">이메일 인증이 확인됐어요. 앞으로 로그인에 사용할 비밀번호를 설정해주세요. (6자 이상)</p>
+    <form id="setPasswordForm" class="admin-form">
+      <label>새 비밀번호<input type="password" id="newPassword" minlength="6" required autocomplete="new-password"></label>
+      <label>비밀번호 확인<input type="password" id="newPasswordConfirm" minlength="6" required autocomplete="new-password"></label>
+      <button type="submit" class="btn btn-primary">설정하고 시작하기</button>
+      <p id="setPasswordError" class="admin-error" hidden></p>
+    </form>
+  </section>
+
+  <!-- 대시보드 -->
+  <section id="dashboardView" hidden>
+
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>카테고리</h2>
+        <button id="addCategoryBtn" class="btn btn-outline btn-sm">+ 카테고리 추가</button>
+      </div>
+      <div id="categoryList" class="admin-category-list"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>제품</h2>
+        <div class="admin-category-filter">
+          <label for="productCategoryFilter">카테고리</label>
+          <select id="productCategoryFilter"></select>
+          <button id="addProductBtn" class="btn btn-outline btn-sm">+ 제품 추가</button>
+        </div>
+      </div>
+      <div id="productList" class="admin-product-list"></div>
+    </div>
+
+  </section>
+
+  <p id="statusMsg" class="admin-status" hidden></p>
+
+</main>
+
+<!-- 카테고리 편집 폼 (모달) -->
+<div id="categoryModal" class="admin-modal" hidden>
+  <div class="admin-modal-box">
+    <h3 id="categoryModalTitle">카테고리 추가</h3>
+    <form id="categoryForm" class="admin-form">
+      <input type="hidden" id="categoryId">
+      <label>카테고리명<input type="text" id="categoryName" required></label>
+      <label>URL용 식별자 (slug, 영문/하이픈)<input type="text" id="categorySlug" required pattern="[a-z0-9-]+"></label>
+      <label>상태
+        <select id="categoryStatus">
+          <option value="active">판매중</option>
+          <option value="coming-soon">준비중</option>
+        </select>
+      </label>
+      <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="categorySortOrder" value="0"></label>
+      <div class="admin-modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>취소</button>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 제품 편집 폼 (모달) -->
+<div id="productModal" class="admin-modal" hidden>
+  <div class="admin-modal-box">
+    <h3 id="productModalTitle">제품 추가</h3>
+    <form id="productForm" class="admin-form">
+      <input type="hidden" id="productId">
+      <label>카테고리
+        <select id="productCategoryId" required></select>
+      </label>
+      <label>제품명<input type="text" id="productName" required></label>
+      <label>한줄 설명<input type="text" id="productDescription"></label>
+      <label>주요 성분<textarea id="productIngredients" rows="2"></textarea></label>
+      <label>가격 (원)<input type="number" id="productPrice" min="0" required></label>
+      <label>구매 링크<input type="url" id="productPurchaseUrl"></label>
+      <label class="admin-checkbox-group">인증
+        <span><label><input type="checkbox" id="certVegan" value="vegan"> 비건 인증</label></span>
+        <span><label><input type="checkbox" id="certSkinTest" value="skin-test"> 피부자극 테스트 인증</label></span>
+      </label>
+      <label>제품 사진
+        <input type="file" id="productImageFile" accept="image/*">
+      </label>
+      <img id="productImagePreview" class="admin-image-preview" hidden>
+      <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="productSortOrder" value="0"></label>
+      <div class="admin-modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>취소</button>
+        <button type="submit" class="btn btn-primary" id="productSaveBtn">저장</button>
+      </div>
+      <p id="productFormError" class="admin-error" hidden></p>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
