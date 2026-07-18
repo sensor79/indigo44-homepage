@@ -195,7 +195,7 @@ section { padding: 96px 0; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(28,44,76,0.12) 0%, rgba(22,40,31,0.55) 65%, rgba(18,32,25,0.82) 100%);
+  background: linear-gradient(180deg, rgba(30,40,20,0.05) 0%, rgba(40,32,18,0.38) 65%, rgba(38,28,16,0.68) 100%);
 }
 
 .hero-inner {
@@ -246,8 +246,9 @@ section { padding: 96px 0; }
   font-size: 15px;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  color: #D9CFAE;
-  opacity: 0.5;
+  color: #FFFDF6;
+  opacity: 0.85;
+  text-shadow: 0 1px 10px rgba(20, 20, 10, 0.45);
 }
 
 .hero-verse span {
@@ -258,7 +259,7 @@ section { padding: 96px 0; }
   font-weight: 500;
   font-size: 9px;
   letter-spacing: 0.18em;
-  opacity: 0.75;
+  opacity: 0.85;
 }
 
 .hero-content {

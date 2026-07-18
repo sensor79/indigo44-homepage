@@ -1,44 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
   <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#232F52"/>
-      <stop offset="55%" stop-color="#1B2A28"/>
-      <stop offset="100%" stop-color="#141C16"/>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#89C2DE"/>
+      <stop offset="26%" stop-color="#6FAFA6"/>
+      <stop offset="52%" stop-color="#4F8B5C"/>
+      <stop offset="76%" stop-color="#5C6B3E"/>
+      <stop offset="100%" stop-color="#4A3A26"/>
     </linearGradient>
-    <radialGradient id="glowWarm" cx="78%" cy="26%" r="55%">
-      <stop offset="0%" stop-color="#C9855A" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#C9855A" stop-opacity="0"/>
+    <radialGradient id="glowSun" cx="80%" cy="16%" r="55%">
+      <stop offset="0%" stop-color="#F6DFA0" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#F6DFA0" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="glowGreen" cx="16%" cy="84%" r="55%">
-      <stop offset="0%" stop-color="#7C8F58" stop-opacity="0.20"/>
-      <stop offset="100%" stop-color="#7C8F58" stop-opacity="0"/>
+    <radialGradient id="glowRiver" cx="20%" cy="46%" r="45%">
+      <stop offset="0%" stop-color="#BFE6DD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#BFE6DD" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="glowSoft" cx="48%" cy="8%" r="60%">
-      <stop offset="0%" stop-color="#AFC0D9" stop-opacity="0.10"/>
-      <stop offset="100%" stop-color="#AFC0D9" stop-opacity="0"/>
+    <radialGradient id="glowForest" cx="66%" cy="66%" r="55%">
+      <stop offset="0%" stop-color="#365434" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#365434" stop-opacity="0"/>
     </radialGradient>
     <filter id="soften" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="70"/>
+      <feGaussianBlur stdDeviation="75"/>
     </filter>
     <filter id="grain">
       <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise"/>
-      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.025 0"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.02 0"/>
     </filter>
   </defs>
 
+  <!-- base: sky -> river mist -> forest -> earth -->
   <rect width="1600" height="900" fill="url(#bgGrad)"/>
 
   <!-- soft diffused light, photographic bokeh feel -->
-  <circle cx="1260" cy="210" r="380" fill="#D08F5E" opacity="0.5" filter="url(#soften)"/>
-  <circle cx="210" cy="770" r="340" fill="#8CA06A" opacity="0.5" filter="url(#soften)"/>
-  <circle cx="820" cy="40" r="260" fill="#AFC0D9" opacity="0.35" filter="url(#soften)"/>
+  <circle cx="1280" cy="120" r="360" fill="#FCEFC7" opacity="0.4" filter="url(#soften)"/>
+  <circle cx="260" cy="380" r="320" fill="#CDEDE4" opacity="0.4" filter="url(#soften)"/>
+  <circle cx="1120" cy="700" r="360" fill="#2F4A2E" opacity="0.4" filter="url(#soften)"/>
 
-  <rect width="1600" height="900" fill="url(#glowWarm)"/>
-  <rect width="1600" height="900" fill="url(#glowGreen)"/>
-  <rect width="1600" height="900" fill="url(#glowSoft)"/>
+  <rect width="1600" height="900" fill="url(#glowSun)"/>
+  <rect width="1600" height="900" fill="url(#glowRiver)"/>
+  <rect width="1600" height="900" fill="url(#glowForest)"/>
 
   <!-- fine film grain for a photographic, non-illustrated feel -->
   <rect width="1600" height="900" filter="url(#grain)"/>
 
-  <text x="1560" y="870" font-family="sans-serif" font-size="14" fill="#F4F1E8" text-anchor="end" opacity="0.35">브랜드 촬영 이미지 준비중</text>
+  <text x="1560" y="870" font-family="sans-serif" font-size="14" fill="#F4F1E8" text-anchor="end" opacity="0.4">브랜드 촬영 이미지 준비중</text>
 </svg>
