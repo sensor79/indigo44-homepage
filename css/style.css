@@ -16,6 +16,7 @@
 
   --font-body: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-heading: 'Noto Serif KR', 'Pretendard', serif;
+  --font-slogan: 'Gowun Batang', 'Noto Serif KR', serif;
 
   --max-width: 1120px;
   --radius: 10px;
@@ -248,7 +249,7 @@ section { padding: 96px 0; }
 }
 
 .hero-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-slogan);
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 700;
   line-height: 1.4;
