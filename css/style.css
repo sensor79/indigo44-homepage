@@ -234,6 +234,26 @@ section { padding: 96px 0; }
   opacity: 0.7;
 }
 
+.hero-verse {
+  margin: 22px 0 0;
+  font-family: var(--font-slogan);
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: #D9CFAE;
+  opacity: 0.6;
+}
+
+.hero-verse span {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  opacity: 0.85;
+}
+
 .hero-content {
   flex-shrink: 0;
   padding-bottom: 72px;
@@ -642,4 +662,6 @@ section { padding: 96px 0; }
 
   .hero-mark-logo { width: clamp(120px, 34vw, 170px); }
   .hero-mark-sub { font-size: 11px; letter-spacing: 0.2em; white-space: nowrap; }
+  .hero-verse { font-size: 12px; margin-top: 16px; padding: 0 12px; }
+  .hero-verse span { font-size: 9.5px; }
 }
