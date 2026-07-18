@@ -235,23 +235,30 @@ section { padding: 96px 0; }
 }
 
 .hero-verse {
-  margin: 22px 0 0;
+  position: absolute;
+  z-index: 2;
+  top: 32px;
+  right: 32px;
+  max-width: 260px;
+  text-align: right;
   font-family: var(--font-slogan);
   font-style: italic;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.5;
   letter-spacing: 0.01em;
   color: #D9CFAE;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .hero-verse span {
   display: block;
-  margin-top: 6px;
+  margin-top: 8px;
   font-family: var(--font-body);
   font-style: normal;
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  opacity: 0.85;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  opacity: 0.75;
 }
 
 .hero-content {
@@ -662,6 +669,12 @@ section { padding: 96px 0; }
 
   .hero-mark-logo { width: clamp(120px, 34vw, 170px); }
   .hero-mark-sub { font-size: 11px; letter-spacing: 0.2em; white-space: nowrap; }
-  .hero-verse { font-size: 12px; margin-top: 16px; padding: 0 12px; }
-  .hero-verse span { font-size: 9.5px; }
+
+  .hero-verse {
+    top: 18px;
+    right: 20px;
+    max-width: 62vw;
+    font-size: 12px;
+  }
+  .hero-verse span { font-size: 8px; margin-top: 6px; }
 }
