@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=18">
+<link rel="stylesheet" href="css/style.css?v=19">
 </head>
 <body>
 
@@ -230,6 +230,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/main.js"></script>
+<!-- 후기 전체 보기 (모달) -->
+<div id="reviewViewModal" class="review-modal" hidden>
+  <div class="review-modal-box" role="dialog" aria-modal="true" aria-label="후기 전체 보기">
+    <button type="button" class="review-modal-close" data-close-review aria-label="닫기">&times;</button>
+    <div id="reviewViewImgWrap" class="review-modal-img" hidden>
+      <img id="reviewViewImg" alt="">
+    </div>
+    <div class="review-modal-body">
+      <p id="reviewViewStars" class="review-modal-stars"></p>
+      <p id="reviewViewText" class="review-modal-text"></p>
+      <p id="reviewViewAuthor" class="review-modal-author"></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js?v=2"></script>
 </body>
 </html>

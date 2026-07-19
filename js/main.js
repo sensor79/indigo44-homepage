@@ -72,8 +72,8 @@ async function loadReviews() {
     return;
   }
 
-  gridEl.innerHTML = data.map(review => `
-    <div class="review-card">
+  gridEl.innerHTML = data.map((review, i) => `
+    <div class="review-card" data-review-index="${i}" role="button" tabindex="0" aria-label="${review.author} 후기 전체 보기">
       ${review.image_url ? `
         <div class="review-img"><img src="${review.image_url}" alt="${review.author} 후기 이미지" loading="lazy"></div>
       ` : `
@@ -83,7 +83,58 @@ async function loadReviews() {
       <p class="review-author">${review.author}</p>
     </div>
   `).join('');
+
+  const openFromEvent = (e) => {
+    const card = e.target.closest('.review-card');
+    if (!card) return;
+    openReviewModal(data[Number(card.dataset.reviewIndex)]);
+  };
+  gridEl.addEventListener('click', openFromEvent);
+  gridEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromEvent(e); }
+  });
 }
+
+function openReviewModal(review) {
+  if (!review) return;
+  const modal = document.getElementById('reviewViewModal');
+
+  document.getElementById('reviewViewStars').textContent =
+    '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+  document.getElementById('reviewViewText').textContent = review.review_text;
+  document.getElementById('reviewViewAuthor').textContent = review.author;
+
+  const imgWrap = document.getElementById('reviewViewImgWrap');
+  const img = document.getElementById('reviewViewImg');
+  if (review.image_url) {
+    img.src = review.image_url;
+    img.alt = review.author + ' 후기 이미지';
+    imgWrap.hidden = false;
+  } else {
+    img.removeAttribute('src');
+    imgWrap.hidden = true;
+  }
+
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReviewModal() {
+  const modal = document.getElementById('reviewViewModal');
+  modal.hidden = true;
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('reviewViewModal');
+  if (!modal) return;
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target.closest('[data-close-review]')) closeReviewModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeReviewModal();
+  });
+});
 
 async function loadProducts() {
   const tabsEl = document.getElementById('categoryTabs');
