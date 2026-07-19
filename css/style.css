@@ -174,21 +174,21 @@ section { padding: 110px 0; }
 
 .hero-wordmark {
   font-family: var(--font-heading);
-  font-size: clamp(64px, 12vw, 150px);
+  font-size: clamp(42px, 6.5vw, 84px);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 1.1;
   color: var(--color-text);
-  margin: 0 0 26px;
+  margin: 0 0 20px;
 }
 
 .hero-wordmark span { color: var(--color-sub); }
 
 .hero-mark-sub {
-  margin: 0 0 64px;
-  font-size: 12px;
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
+  margin: 0 0 56px;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
   color: var(--color-text-soft);
   text-transform: uppercase;
 }
