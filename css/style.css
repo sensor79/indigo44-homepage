@@ -187,14 +187,25 @@ section { padding: 110px 0; }
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   opacity: 0;
-  animation: heroDraw var(--dur, 1s) ease forwards;
-  animation-delay: var(--d, 0s);
+  animation: heroDraw 7s ease-in-out infinite;
+  animation-delay: 0s; /* 산: 가장 먼저 */
 }
 
+/* 순서: 산(0) → 태양(원 → 빛살) → 나무 → 바다 */
+.hero-scene .scene-sun circle { animation-delay: 0.45s; }
+.hero-scene .scene-sun line   { animation-delay: 0.9s; }
+.hero-scene .scene-tree path  { animation-delay: 1.2s; }
+.hero-scene .scene-tree line  { animation-delay: 1.4s; }
+.hero-scene .scene-sea path:nth-of-type(1) { animation-delay: 1.55s; }
+.hero-scene .scene-sea path:nth-of-type(2) { animation-delay: 1.75s; }
+
 @keyframes heroDraw {
-  0%   { stroke-dashoffset: 1; opacity: 0; }
-  12%  { opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 1; }
+  0%   { stroke-dashoffset: 1; opacity: 0; }   /* 안 그려진 상태 */
+  3%   { opacity: 1; }                          /* 나타나며 */
+  15%  { stroke-dashoffset: 0; opacity: 1; }    /* 선이 다 그려짐 */
+  82%  { stroke-dashoffset: 0; opacity: 1; }    /* 잠시 유지 */
+  96%  { stroke-dashoffset: 0; opacity: 0; }    /* 부드럽게 사라짐 */
+  100% { stroke-dashoffset: 1; opacity: 0; }    /* 안 보일 때 초기화 → 반복 */
 }
 
 @media (prefers-reduced-motion: reduce) {
