@@ -248,6 +248,15 @@ section { padding: 110px 0; }
 
 .about .section-eyebrow { width: 100%; }
 
+.about-lead {
+  max-width: 680px;
+  margin: 26px auto 0;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--color-text-soft);
+}
+
 .about-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -267,30 +276,24 @@ section { padding: 110px 0; }
 }
 .about-block p { color: var(--color-text-soft); font-size: 14.5px; margin: 0; }
 
-.impact-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-top: 28px;
-}
+.value-list { margin-top: 4px; }
 
-.impact-stat {
-  background: transparent;
-  border: none;
-  border-top: 1px solid var(--color-main);
-  padding: 20px 4px 0;
-  text-align: left;
+.value-item {
+  padding: 18px 0;
+  border-top: 1px solid var(--color-border);
 }
+.value-item:last-child { border-bottom: 1px solid var(--color-border); }
 
-.impact-stat .num {
-  font-family: var(--font-heading);
-  font-size: 26px;
-  color: var(--color-text);
-  font-weight: 600;
+.value-en {
   display: block;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
   margin-bottom: 6px;
 }
-.impact-stat .label { font-size: 12.5px; color: var(--color-text-soft); }
+.value-item p { font-size: 13px; line-height: 1.7; color: var(--color-text-soft); margin: 0; }
 
 /* ===== Products ===== */
 .products { background: var(--color-bg); text-align: center; }
@@ -780,7 +783,6 @@ section { padding: 110px 0; }
     gap: 18px;
   }
 
-  .impact-stats { grid-template-columns: 1fr; }
   .footer-top { flex-direction: column; }
 
   .hero { padding: 130px 0 80px; }
