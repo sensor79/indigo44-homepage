@@ -1,5 +1,11 @@
+# 로컬 도구 설정
 .claude/
+
+# 내부 문서 (기획 스펙 — 개인 연락처 포함)
 docs/
-로고(테두리).jpg
+
+# 원본 소스 파일 (사이트에는 가공된 PNG만 사용)
+assets/source/
+
+# macOS
 .DS_Store
-supabase/
