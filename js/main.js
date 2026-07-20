@@ -93,6 +93,35 @@ async function loadReviews() {
   gridEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromEvent(e); }
   });
+
+  initReviewCarousel(gridEl);
+}
+
+// 후기 좌우 슬라이드: 데스크톱에선 화살표, 모바일에선 스와이프
+function initReviewCarousel(track) {
+  const carousel = track.closest('.review-carousel');
+  if (!carousel) return;
+
+  const prev = carousel.querySelector('.review-nav-prev');
+  const next = carousel.querySelector('.review-nav-next');
+  if (!prev || !next) return;
+
+  const updateNav = () => {
+    const scrollable = track.scrollWidth - track.clientWidth > 4;
+    const hasArrows = window.matchMedia('(min-width: 721px)').matches;
+    const atStart = track.scrollLeft <= 2;
+    const atEnd = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
+    prev.hidden = !scrollable || !hasArrows || atStart;
+    next.hidden = !scrollable || !hasArrows || atEnd;
+  };
+
+  const step = () => Math.max(track.clientWidth * 0.8, 200);
+  prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+  next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+
+  track.addEventListener('scroll', updateNav, { passive: true });
+  window.addEventListener('resize', updateNav);
+  updateNav();
 }
 
 function openReviewModal(review) {

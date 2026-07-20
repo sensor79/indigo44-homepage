@@ -544,16 +544,53 @@ section { padding: 110px 0; }
   border-bottom: 1px solid var(--color-border);
 }
 
-.review-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 20px;
-  align-items: start;
+.review-carousel {
+  position: relative;
   max-width: 960px;
   margin: 0 auto;
 }
 
+.review-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+.review-track::-webkit-scrollbar { display: none; }
+
+.review-track > .category-empty { flex: 1 0 100%; }
+
+.review-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-paper);
+  color: var(--color-text);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.review-nav:hover { background: var(--color-beige); border-color: var(--color-sub); }
+.review-nav[hidden] { display: none; }
+.review-nav-prev { left: -17px; }
+.review-nav-next { right: -17px; }
+
 .review-card {
+  flex: 0 0 296px;
+  scroll-snap-align: start;
   background: var(--color-bg);
   border-radius: 2px;
   padding: 20px;
@@ -799,4 +836,23 @@ section { padding: 110px 0; }
   .hero-verse span { font-size: 8px; margin-top: 5px; }
 
   .product-grid { gap: 48px 24px; }
+
+  /* 후기: 좌우 스와이프 + 더 작고 정돈된 카드 */
+  .review-track { gap: 12px; }
+  .review-nav { display: none; }
+
+  .review-card {
+    flex: 0 0 72vw;
+    max-width: 260px;
+    padding: 15px;
+  }
+  .review-card .review-img { margin-bottom: 11px; }
+  .review-card .stars { font-size: 10px; margin-bottom: 8px; }
+  .review-card .review-text {
+    font-size: 12px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    -webkit-line-clamp: 5;
+  }
+  .review-card .review-author { font-size: 10.5px; }
 }

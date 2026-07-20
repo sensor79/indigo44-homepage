@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=21">
+<link rel="stylesheet" href="css/style.css?v=22">
 </head>
 <body>
 
@@ -188,7 +188,11 @@
     <h2 class="section-title">고객 후기</h2>
     <p class="section-desc">인디고포포를 먼저 만나보신 분들의 이야기예요.</p>
 
-    <div class="review-grid" id="reviewGrid"></div>
+    <div class="review-carousel">
+      <button type="button" class="review-nav review-nav-prev" aria-label="이전 후기" hidden>&#8249;</button>
+      <div class="review-track" id="reviewGrid"></div>
+      <button type="button" class="review-nav review-nav-next" aria-label="다음 후기" hidden>&#8250;</button>
+    </div>
   </div>
 </section>
 
@@ -246,6 +250,6 @@
   </div>
 </div>
 
-<script src="js/main.js?v=2"></script>
+<script src="js/main.js?v=3"></script>
 </body>
 </html>
