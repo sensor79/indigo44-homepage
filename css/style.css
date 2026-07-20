@@ -34,6 +34,8 @@ body {
   background: var(--color-bg);
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 img { max-width: 100%; display: block; }
