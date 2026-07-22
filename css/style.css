@@ -176,45 +176,6 @@ section { padding: 110px 0; }
 
 .hero .container { position: relative; z-index: 1; }
 
-/* 실제 영상 대신, 코드로 만든 은은한 자연 배경 (블롭 + 떠오르는 입자) */
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hero-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.32;
-  will-change: transform;
-}
-.hero-blob--leaf {
-  width: 280px; height: 280px;
-  top: -60px; left: 6%;
-  background: #8FAE7C;
-  animation: blobDriftA 17s ease-in-out infinite alternate;
-}
-.hero-blob--water {
-  width: 240px; height: 240px;
-  bottom: -60px; right: 8%;
-  background: #6E8BA0;
-  animation: blobDriftB 21s ease-in-out infinite alternate;
-}
-.hero-blob--sun {
-  width: 190px; height: 190px;
-  top: 14%; right: 26%;
-  background: #D8B26B;
-  animation: blobDriftC 15s ease-in-out infinite alternate;
-}
-
-@keyframes blobDriftA { from { transform: translate(0,0) scale(1); } to { transform: translate(24px,18px) scale(1.1); } }
-@keyframes blobDriftB { from { transform: translate(0,0) scale(1); } to { transform: translate(-20px,-16px) scale(1.08); } }
-@keyframes blobDriftC { from { transform: translate(0,0) scale(1); } to { transform: translate(-14px,20px) scale(0.95); } }
-
 /* 히어로 라인 드로잉 (산·바다·태양·나무) */
 .hero-scene {
   display: block;
@@ -273,7 +234,7 @@ section { padding: 110px 0; }
     stroke-dashoffset: 0;
     opacity: 1;
   }
-  .hero-blob, .amb-pulse, .amb-sway, .amb-shimmer {
+  .amb-pulse, .amb-sway, .amb-shimmer {
     animation: none;
   }
 }
@@ -444,21 +405,21 @@ section { padding: 110px 0; }
 }
 
 .product-card {
-  background: transparent;
-  border: none;
-  border-radius: 0;
+  background: var(--color-paper);
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
   overflow: visible;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0;
-  box-shadow: none;
-  transition: transform 0.25s ease;
+  padding: 24px 20px 26px;
+  box-shadow: 0 8px 20px rgba(28, 30, 35, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .product-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 24px rgba(28, 30, 35, 0.08);
+  box-shadow: 0 16px 32px rgba(28, 30, 35, 0.1);
 }
 
 .product-card .thumb {
