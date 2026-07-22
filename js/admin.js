@@ -1,6 +1,11 @@
 // ===== 인디고44 관리자 페이지 =====
 
-const CERT_LABELS = { vegan: '비건 인증', 'skin-test': '피부자극 테스트 인증' };
+const CERT_LABELS = {
+  vegan: '비건 인증',
+  'skin-test': '피부자극 테스트 인증',
+  'heavy-metal-free': '무중금속 인증',
+  antibacterial: '항균테스트 인증'
+};
 
 const views = {
   login: document.getElementById('loginView'),
@@ -295,6 +300,8 @@ function openProductModal(id) {
   const certs = (product && product.certifications) || [];
   document.getElementById('certVegan').checked = certs.includes('vegan');
   document.getElementById('certSkinTest').checked = certs.includes('skin-test');
+  document.getElementById('certHeavyMetalFree').checked = certs.includes('heavy-metal-free');
+  document.getElementById('certAntibacterial').checked = certs.includes('antibacterial');
 
   document.getElementById('productImageFile').value = '';
   const preview = document.getElementById('productImagePreview');
@@ -336,6 +343,8 @@ async function onProductSubmit(e) {
     const certifications = [];
     if (document.getElementById('certVegan').checked) certifications.push('vegan');
     if (document.getElementById('certSkinTest').checked) certifications.push('skin-test');
+    if (document.getElementById('certHeavyMetalFree').checked) certifications.push('heavy-metal-free');
+    if (document.getElementById('certAntibacterial').checked) certifications.push('antibacterial');
 
     const payload = {
       category_id: document.getElementById('productCategoryId').value,

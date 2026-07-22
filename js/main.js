@@ -1,6 +1,55 @@
 // ===== 인디고포포 홈페이지 인터랙션 =====
 
-const CERT_LABELS = { vegan: '비건 인증', 'skin-test': '피부자극 테스트 인증' };
+const CERT_LABELS = {
+  vegan: '비건 인증',
+  'skin-test': '피부자극 테스트 인증',
+  'heavy-metal-free': '무중금속 인증',
+  antibacterial: '항균테스트 인증'
+};
+
+const FALLBACK_CATEGORIES = [
+  { id: 'fallback-cat-soap', name: '고체비누', status: 'active', sort_order: 0 },
+  { id: 'fallback-cat-care', name: '바디케어', status: 'active', sort_order: 1 }
+];
+
+const FALLBACK_PRODUCTS = [
+  {
+    id: 'fallback-product-1',
+    category_id: 'fallback-cat-soap',
+    name: '오가닉 샴푸바',
+    description: '부드러운 거품과 깔끔한 세정감으로 일상에 자연스럽게 더해보세요.',
+    ingredients: '코코넛오일, 라벤더 추출물, 소듐코코일글루타메이트',
+    price: 18000,
+    purchase_url: 'https://smartstore.naver.com/indigo44',
+    certifications: ['vegan', 'heavy-metal-free'],
+    image_url: 'assets/images/placeholder-product.svg',
+    sort_order: 0
+  },
+  {
+    id: 'fallback-product-2',
+    category_id: 'fallback-cat-soap',
+    name: '클린 바디바',
+    description: '피부에 자극이 덜 가도록 순한 성분만 담아 만든 바디바입니다.',
+    ingredients: '유기농 코코넛오일, 글리세린, 베이비오일',
+    price: 16000,
+    purchase_url: 'https://smartstore.naver.com/indigo44',
+    certifications: ['skin-test', 'antibacterial'],
+    image_url: 'assets/images/placeholder-product.svg',
+    sort_order: 1
+  },
+  {
+    id: 'fallback-product-3',
+    category_id: 'fallback-cat-care',
+    name: '비건 핸드바',
+    description: '손을 자주 씻는 일상에 맞춰 가볍고 편안한 사용감을 제공합니다.',
+    ingredients: '올리브오일, 소듐 하이드록사이드, 향료',
+    price: 14000,
+    purchase_url: 'https://smartstore.naver.com/indigo44',
+    certifications: ['vegan', 'antibacterial'],
+    image_url: 'assets/images/placeholder-product.svg',
+    sort_order: 0
+  }
+];
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavToggle();
@@ -195,22 +244,33 @@ async function loadProducts() {
 }
 
 async function fetchCategoriesWithProducts() {
-  const { data: categories, error: catErr } = await supabaseClient
-    .from('categories')
-    .select('*')
-    .order('sort_order', { ascending: true });
-  if (catErr) throw catErr;
+  try {
+    const { data: categories, error: catErr } = await supabaseClient
+      .from('categories')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    if (catErr) throw catErr;
 
-  const { data: products, error: prodErr } = await supabaseClient
-    .from('products')
-    .select('*')
-    .order('sort_order', { ascending: true });
-  if (prodErr) throw prodErr;
+    const { data: products, error: prodErr } = await supabaseClient
+      .from('products')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    if (prodErr) throw prodErr;
 
-  return categories.map(cat => ({
-    ...cat,
-    products: products.filter(p => p.category_id === cat.id)
-  }));
+    const resolvedCategories = (categories && categories.length) ? categories : FALLBACK_CATEGORIES;
+    const resolvedProducts = (products && products.length) ? products : FALLBACK_PRODUCTS;
+
+    return resolvedCategories.map(cat => ({
+      ...cat,
+      products: resolvedProducts.filter(p => p.category_id === cat.id)
+    }));
+  } catch (err) {
+    console.warn('제품 데이터를 불러오지 못해 기본 예시를 표시합니다.', err);
+    return FALLBACK_CATEGORIES.map(cat => ({
+      ...cat,
+      products: FALLBACK_PRODUCTS.filter(p => p.category_id === cat.id)
+    }));
+  }
 }
 
 function renderProducts(category, gridEl) {

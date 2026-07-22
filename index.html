@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=24">
+<link rel="stylesheet" href="css/style.css?v=26">
 </head>
 <body>
 
@@ -47,12 +47,29 @@
 
 <!-- ===== Hero ===== -->
 <section class="hero">
+  <!-- 실제 영상 대신 코드로 만든 은은한 자연 배경 애니메이션 -->
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-blob hero-blob--leaf"></div>
+    <div class="hero-blob hero-blob--water"></div>
+    <div class="hero-blob hero-blob--sun"></div>
+    <div class="hero-particles">
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+      <span class="hero-particle"></span>
+    </div>
+  </div>
   <p class="hero-verse">“In the beginning God created the heavens and the earth.”<span>Genesis 1:1 · NIV</span></p>
   <div class="container hero-content">
     <svg class="hero-scene" viewBox="0 0 260 190" fill="none" aria-hidden="true"
          stroke-linecap="round" stroke-linejoin="round">
       <!-- 태양 (sun) -->
-      <g class="scene-sun" stroke="#A96B3E" stroke-width="2">
+      <g class="scene-sun amb-pulse" stroke="#A96B3E" stroke-width="2">
         <circle class="draw" style="--d:.5s;--dur:1s" cx="150" cy="66" r="22" pathLength="1"/>
         <line class="draw" style="--d:1.35s;--dur:.5s" x1="150" y1="30" x2="150" y2="16" pathLength="1"/>
         <line class="draw" style="--d:1.42s;--dur:.5s" x1="175" y1="41" x2="185" y2="31" pathLength="1"/>
@@ -66,12 +83,12 @@
       <path class="draw" style="--d:0s;--dur:1.3s" stroke="#6E8BA0" stroke-width="2"
             d="M8 152 L64 152 L100 116 L134 150 L178 124 L214 152 L252 152" pathLength="1"/>
       <!-- 나무 (tree) -->
-      <g class="scene-tree" stroke="#6F8A54" stroke-width="2">
+      <g class="scene-tree amb-sway" stroke="#6F8A54" stroke-width="2">
         <path class="draw" style="--d:2.2s;--dur:.7s" d="M40 120 L28 143 L52 143 Z" pathLength="1"/>
         <line class="draw" style="--d:2.85s;--dur:.35s" x1="40" y1="143" x2="40" y2="153" pathLength="1"/>
       </g>
       <!-- 바다 (sea) -->
-      <g class="scene-sea" stroke="#6E8BA0" stroke-width="2">
+      <g class="scene-sea amb-shimmer" stroke="#6E8BA0" stroke-width="2">
         <path class="draw" style="--d:3.1s;--dur:1s" d="M74 170 q10 -8 20 0 q10 8 20 0 q10 -8 20 0 q10 8 20 0" pathLength="1"/>
         <path class="draw" style="--d:3.35s;--dur:1s" d="M96 182 q10 -8 20 0 q10 8 20 0 q10 -8 20 0" pathLength="1"/>
       </g>
@@ -141,32 +158,99 @@
 
 <!-- ===== Standard / Our Promise ===== -->
 <section class="standard" id="standard">
-  <div class="container">
-    <p class="section-eyebrow">Our Standard</p>
-    <h2 class="section-title">인디고포포의 약속</h2>
-    <p class="section-desc">특정 제품만이 아니라, 인디고포포가 만드는 모든 제품에 적용되는 원칙입니다.</p>
+  <!-- 라인아트 아이콘 스프라이트 (재사용) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="icon-mountain" viewBox="0 0 32 32"><path d="M4 24 L11 14 L15 18 L20 12 L28 24 Z"/></symbol>
+      <symbol id="icon-tree" viewBox="0 0 32 32"><path d="M16 5 L10 13 L12 13 L8 21 L24 21 L20 13 L22 13 Z"/><path d="M16 13 L16 27"/></symbol>
+      <symbol id="icon-drop" viewBox="0 0 32 32"><path d="M16 4 C21 10 24 15 24 20 A8 8 0 0 1 8 20 C8 15 11 10 16 4 Z"/><path d="M16 10 C18 14 19 17 19 19"/></symbol>
+      <symbol id="icon-sun" viewBox="0 0 32 32"><circle cx="16" cy="16" r="7"/><path d="M16 2 L16 6"/><path d="M16 26 L16 30"/><path d="M2 16 L6 16"/><path d="M26 16 L30 16"/><path d="M6 6 L8.5 8.5"/><path d="M24 24 L26.5 26.5"/><path d="M6 26 L8.5 23.5"/><path d="M24 8 L26.5 5.5"/></symbol>
+      <symbol id="icon-soap" viewBox="0 0 32 32"><rect x="8" y="11" width="16" height="12" rx="3"/><path d="M12 11 C13 8 13 7 16 7"/><path d="M20 11 C19 8 19 7 16 7"/><path d="M11 23 C13 21 15 20 17 23"/></symbol>
+      <symbol id="icon-foam" viewBox="0 0 32 32"><circle cx="10" cy="20" r="3"/><circle cx="16" cy="15" r="4.5"/><circle cx="22" cy="20" r="2.5"/></symbol>
+      <symbol id="icon-paper" viewBox="0 0 32 32"><rect x="8" y="7" width="16" height="18" rx="2"/><path d="M12 13 H20"/><path d="M12 17 H18"/></symbol>
+      <symbol id="icon-recycle" viewBox="0 0 32 32"><path d="M10 8 L6 12 L10 16"/><path d="M6 12 H20 A8 8 0 0 1 28 20"/><path d="M22 24 L26 20 L22 16"/><path d="M26 20 H12 A8 8 0 0 0 4 12"/></symbol>
+      <symbol id="icon-soil" viewBox="0 0 32 32"><path d="M6 24 C10 16 16 13 26 24"/><path d="M16 14 L16 8"/><path d="M16 8 L12 12"/><path d="M16 8 L20 12"/></symbol>
+      <symbol id="icon-person" viewBox="0 0 32 32"><circle cx="16" cy="10" r="4"/><path d="M8 27 C8 20 24 20 24 27"/></symbol>
+      <symbol id="icon-river" viewBox="0 0 32 32"><path d="M3 14 C8 10 11 10 16 14 C21 18 24 18 29 14"/><path d="M3 20 C8 16 11 16 16 20 C21 24 24 24 29 20"/></symbol>
+      <symbol id="icon-paw" viewBox="0 0 32 32"><circle cx="10" cy="11" r="2.3"/><circle cx="16" cy="8" r="2.3"/><circle cx="22" cy="11" r="2.3"/><circle cx="13" cy="18" r="3.5"/><circle cx="21" cy="18" r="3.5"/></symbol>
+      <symbol id="icon-hand" viewBox="0 0 32 32"><path d="M10 27 V17 C10 13 12 11 15 11 C18 11 20 13 20 17 V27"/><path d="M15 11 V7"/><path d="M20 11 V8"/></symbol>
+      <symbol id="icon-dry" viewBox="0 0 32 32"><path d="M8 10 L16 4 L24 10"/><path d="M8 20 L16 14 L24 20"/><path d="M8 30 L16 24 L24 30"/></symbol>
+      <symbol id="icon-package" viewBox="0 0 32 32"><rect x="7" y="9" width="18" height="14" rx="2"/><path d="M16 9 V23"/><path d="M7 15 H25"/><path d="M12 9 L16 5 L20 9"/></symbol>
+    </defs>
+  </svg>
 
-    <div class="standard-grid">
-      <div class="standard-card">
-        <div class="icon">✓</div>
-        <h3>성분·소재 공개</h3>
-        <p>모든 제품의 주요 성분과 소재를 투명하게 공개합니다.</p>
-      </div>
-      <div class="standard-card">
-        <div class="icon">♻</div>
-        <h3>친환경 포장</h3>
-        <p>불필요한 플라스틱을 줄인 포장을 원칙으로 합니다.</p>
-      </div>
-      <div class="standard-card">
-        <div class="icon">🌱</div>
-        <h3>생분해성 소재</h3>
-        <p>자연으로 돌아갈 수 있는 소재를 우선적으로 선택합니다.</p>
-      </div>
-      <div class="standard-card">
-        <div class="icon">🤝</div>
-        <h3>윤리적 생산</h3>
-        <p>사람과 환경 모두에게 부담을 주지 않는 방식으로 생산합니다.</p>
-      </div>
+  <div class="container">
+    <p class="section-eyebrow">Our Philosophy</p>
+    <h2 class="section-title">인디고포포의 약속</h2>
+    <p class="section-desc">인디고포포는 지켜야 할 원칙보다, 우리가 믿는 철학을 보여드리고 싶습니다.</p>
+
+    <div class="philosophy-list">
+      <article class="philosophy-card">
+        <span class="philosophy-num">01</span>
+        <h3 class="philosophy-title">자연에서 빌려옵니다.</h3>
+        <div class="philosophy-flow philosophy-flow--converge" aria-hidden="true">
+          <div class="flow-sources">
+            <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-mountain"/></svg></span>
+            <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-tree"/></svg></span>
+            <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-drop"/></svg></span>
+            <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-sun"/></svg></span>
+          </div>
+          <span class="flow-arrow flow-arrow--down">↓</span>
+          <span class="p-icon-circle is-result"><svg class="p-icon"><use href="#icon-soap"/></svg></span>
+        </div>
+        <p class="philosophy-quote">우리는 자연의 것을 빌려 사용할 뿐,<br>소유하지 않습니다.</p>
+      </article>
+
+      <article class="philosophy-card">
+        <span class="philosophy-num">02</span>
+        <h3 class="philosophy-title">오래 남기지 않습니다.</h3>
+        <div class="philosophy-flow philosophy-flow--linear" aria-hidden="true">
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-soap"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-foam"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-paper"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-recycle"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-soil"/></svg></span>
+        </div>
+        <p class="philosophy-quote">사용할 때보다<br>사용한 이후를 더 많이 생각합니다.</p>
+      </article>
+
+      <article class="philosophy-card">
+        <span class="philosophy-num">03</span>
+        <h3 class="philosophy-title">모든 것은 연결되어 있습니다.</h3>
+        <div class="philosophy-flow philosophy-flow--circle" aria-hidden="true">
+          <span class="flow-ring"></span>
+          <span class="p-icon-circle p-node p-node--top"><svg class="p-icon"><use href="#icon-person"/></svg></span>
+          <span class="p-icon-circle p-node p-node--right"><svg class="p-icon"><use href="#icon-river"/></svg></span>
+          <span class="p-icon-circle p-node p-node--bottom"><svg class="p-icon"><use href="#icon-tree"/></svg></span>
+          <span class="p-icon-circle p-node p-node--left"><svg class="p-icon"><use href="#icon-paw"/></svg></span>
+          <span class="flow-turn flow-turn--ne">↘</span>
+          <span class="flow-turn flow-turn--se">↙</span>
+          <span class="flow-turn flow-turn--sw">↖</span>
+          <span class="flow-turn flow-turn--nw">↗</span>
+        </div>
+        <p class="philosophy-quote">하나의 선택은<br>결국 모두에게 돌아옵니다.</p>
+      </article>
+
+      <article class="philosophy-card">
+        <span class="philosophy-num">04</span>
+        <h3 class="philosophy-title">천천히 만들어도 괜찮습니다.</h3>
+        <div class="philosophy-flow philosophy-flow--linear" aria-hidden="true">
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-hand"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-soap"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-dry"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-package"/></svg></span>
+          <span class="flow-arrow">→</span>
+          <span class="p-icon-circle"><svg class="p-icon"><use href="#icon-person"/></svg></span>
+        </div>
+        <p class="philosophy-quote">더 빨리보다<br>더 오래 사용할 수 있는 제품을 만듭니다.</p>
+      </article>
     </div>
 
     <p class="cert-note">
@@ -277,6 +361,6 @@
   </div>
 </div>
 
-<script src="js/main.js?v=3"></script>
+<script src="js/main.js?v=4"></script>
 </body>
 </html>

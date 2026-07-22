@@ -169,9 +169,79 @@ section { padding: 110px 0; }
 .hero {
   position: relative;
   background: var(--color-bg);
-  padding: 150px 0 120px;
+  padding: 168px 0 132px;
   text-align: center;
   overflow: hidden;
+}
+
+.hero .container { position: relative; z-index: 1; }
+
+/* 실제 영상 대신, 코드로 만든 은은한 자연 배경 (블롭 + 떠오르는 입자) */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.32;
+  will-change: transform;
+}
+.hero-blob--leaf {
+  width: 280px; height: 280px;
+  top: -60px; left: 6%;
+  background: #8FAE7C;
+  animation: blobDriftA 17s ease-in-out infinite alternate;
+}
+.hero-blob--water {
+  width: 240px; height: 240px;
+  bottom: -60px; right: 8%;
+  background: #6E8BA0;
+  animation: blobDriftB 21s ease-in-out infinite alternate;
+}
+.hero-blob--sun {
+  width: 190px; height: 190px;
+  top: 14%; right: 26%;
+  background: #D8B26B;
+  animation: blobDriftC 15s ease-in-out infinite alternate;
+}
+
+@keyframes blobDriftA { from { transform: translate(0,0) scale(1); } to { transform: translate(24px,18px) scale(1.1); } }
+@keyframes blobDriftB { from { transform: translate(0,0) scale(1); } to { transform: translate(-20px,-16px) scale(1.08); } }
+@keyframes blobDriftC { from { transform: translate(0,0) scale(1); } to { transform: translate(-14px,20px) scale(0.95); } }
+
+.hero-particles { position: absolute; inset: 0; }
+
+.hero-particle {
+  position: absolute;
+  bottom: -30px;
+  width: 8px;
+  height: 12px;
+  background: var(--color-sub);
+  opacity: 0;
+  border-radius: 0 60% 0 60%;
+  animation: leafRise linear infinite;
+}
+.hero-particle:nth-child(1) { left: 8%;  --drift: 22px; width: 7px;  height: 10px; animation-duration: 15s; animation-delay: 0s; }
+.hero-particle:nth-child(2) { left: 18%; --drift: -18px; width: 9px; height: 13px; animation-duration: 19s; animation-delay: 2s; }
+.hero-particle:nth-child(3) { left: 30%; --drift: 16px;  width: 6px; height: 9px;  animation-duration: 13s; animation-delay: 5s; }
+.hero-particle:nth-child(4) { left: 44%; --drift: -24px; width: 8px; height: 12px; animation-duration: 17s; animation-delay: 1s; }
+.hero-particle:nth-child(5) { left: 58%; --drift: 20px;  width: 7px; height: 11px; animation-duration: 21s; animation-delay: 4s; }
+.hero-particle:nth-child(6) { left: 68%; --drift: -16px; width: 9px; height: 13px; animation-duration: 14s; animation-delay: 7s; }
+.hero-particle:nth-child(7) { left: 78%; --drift: 18px;  width: 6px; height: 9px;  animation-duration: 18s; animation-delay: 3s; }
+.hero-particle:nth-child(8) { left: 88%; --drift: -20px; width: 8px; height: 12px; animation-duration: 16s; animation-delay: 6s; }
+.hero-particle:nth-child(9) { left: 95%; --drift: 14px;  width: 7px; height: 10px; animation-duration: 20s; animation-delay: 9s; }
+
+@keyframes leafRise {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.4; }
+  90%  { opacity: 0.4; }
+  100% { transform: translate(var(--drift, 20px), -420px) rotate(180deg); opacity: 0; }
 }
 
 /* 히어로 라인 드로잉 (산·바다·태양·나무) */
@@ -208,20 +278,42 @@ section { padding: 110px 0; }
   100% { stroke-dashoffset: 1; opacity: 0; }    /* 안 보일 때 초기화 → 반복 */
 }
 
+/* 계속 살아있는 느낌을 주는 앰비언트 모션 (그리기 애니메이션과 별개로 계속 반복) */
+.amb-pulse { transform-origin: 150px 66px; animation: ambSunPulse 5s ease-in-out infinite; }
+.amb-sway { transform-origin: 40px 153px; animation: ambSway 6s ease-in-out infinite; }
+.amb-shimmer { animation: ambShimmer 8s ease-in-out infinite; }
+
+@keyframes ambSunPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes ambSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+@keyframes ambShimmer {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-scene .draw {
     animation: none;
     stroke-dashoffset: 0;
     opacity: 1;
   }
+  .hero-blob, .hero-particle, .amb-pulse, .amb-sway, .amb-shimmer {
+    animation: none;
+  }
+  .hero-particle { opacity: 0; }
 }
 
 .hero-wordmark {
   font-family: var(--font-heading);
-  font-size: clamp(42px, 6.5vw, 84px);
+  font-size: clamp(42px, 6.8vw, 92px);
   font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
   color: var(--color-text);
   margin: 0 0 20px;
 }
@@ -383,11 +475,20 @@ section { padding: 110px 0; }
 
 .product-card {
   background: transparent;
+  border: none;
   border-radius: 0;
   overflow: visible;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0;
+  box-shadow: none;
+  transition: transform 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(28, 30, 35, 0.08);
 }
 
 .product-card .thumb {
@@ -396,6 +497,14 @@ section { padding: 110px 0; }
   background: var(--color-beige);
   overflow: hidden;
   margin-bottom: 22px;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(28, 30, 35, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.product-card:hover .thumb {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 34px rgba(28, 30, 35, 0.14);
 }
 .product-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -407,6 +516,7 @@ section { padding: 110px 0; }
   gap: 8px;
   flex: 1;
   width: 100%;
+  justify-content: flex-start;
 }
 
 .product-name {
@@ -417,7 +527,13 @@ section { padding: 110px 0; }
   margin: 0;
 }
 
-.product-desc { font-size: 13px; color: var(--color-text-soft); margin: 0; max-width: 260px; }
+.product-desc {
+  font-size: 13px;
+  color: var(--color-text-soft);
+  margin: 0;
+  max-width: 260px;
+  min-height: 38px;
+}
 
 .product-ingredients {
   font-size: 11.5px;
@@ -425,6 +541,7 @@ section { padding: 110px 0; }
   line-height: 1.6;
   max-width: 260px;
   margin: 0;
+  min-height: 44px;
 }
 
 .product-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
@@ -433,22 +550,24 @@ section { padding: 110px 0; }
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  padding: 4px 9px;
-  border-radius: 2px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  color: var(--color-sub);
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(169, 107, 62, 0.1);
+  border: 1px solid rgba(169, 107, 62, 0.2);
+  color: var(--color-main);
 }
 
 .product-footer {
-  margin-top: 14px;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
-  padding-top: 0;
+  padding-top: 12px;
   border-top: none;
   width: 100%;
+  min-height: 66px;
 }
 
 .product-price {
@@ -484,39 +603,144 @@ section { padding: 110px 0; }
   border-bottom: 1px solid var(--color-border);
 }
 
-.standard-grid {
+.philosophy-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 48px 56px;
 }
 
-.standard-card {
-  padding: 24px 4px 0;
-  border-radius: 0;
-  background: transparent;
-  border: none;
+.philosophy-card {
+  padding: 26px 6px 0;
   border-top: 1px solid var(--color-main);
+  transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
-.standard-card .icon {
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-sub);
+.philosophy-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-accent);
+}
+
+.philosophy-num {
   display: block;
-  font-size: 18px;
-  margin-bottom: 14px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--color-sub);
+  margin-bottom: 10px;
 }
 
-.standard-card h3 {
+.philosophy-title {
   font-family: var(--font-heading);
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 600;
-  margin: 0 0 8px;
   color: var(--color-text);
+  margin: 0 0 24px;
 }
-.standard-card p { font-size: 13px; color: var(--color-text-soft); margin: 0; }
+
+/* 아이콘 공통 */
+.p-icon-circle {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-beige);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+.p-icon-circle.is-result {
+  width: 52px;
+  height: 52px;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.p-icon {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--color-main-light);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.is-result .p-icon { stroke: var(--color-bg); }
+
+.philosophy-card:hover .p-icon-circle {
+  transform: translateY(-3px);
+  border-color: var(--color-accent);
+}
+
+.flow-arrow {
+  font-size: 15px;
+  color: var(--color-sub);
+  flex: 0 0 auto;
+}
+
+/* 흐름: 가로 일렬 (②④) */
+.philosophy-flow--linear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+/* 흐름: 4가지가 하나로 모임 (①) */
+.philosophy-flow--converge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.flow-sources {
+  display: flex;
+  gap: 14px;
+}
+.flow-arrow--down { line-height: 1; }
+
+/* 흐름: 원형 연결 (③) */
+.philosophy-flow--circle {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 24px;
+}
+.flow-ring {
+  position: absolute;
+  inset: 20px;
+  border: 1px dashed var(--color-border);
+  border-radius: 50%;
+}
+.p-node { position: absolute; }
+.p-node--top { top: 0; left: 50%; transform: translateX(-50%); }
+.p-node--right { top: 50%; right: 0; transform: translateY(-50%); }
+.p-node--bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+.p-node--left { top: 50%; left: 0; transform: translateY(-50%); }
+.philosophy-card:hover .p-node--top { transform: translateX(-50%) translateY(-3px); }
+.philosophy-card:hover .p-node--bottom { transform: translateX(-50%) translateY(3px); }
+.philosophy-card:hover .p-node--left { transform: translateY(-50%) translateX(-3px); }
+.philosophy-card:hover .p-node--right { transform: translateY(-50%) translateX(3px); }
+
+.flow-turn {
+  position: absolute;
+  font-size: 14px;
+  color: var(--color-sub);
+}
+.flow-turn--ne { top: 16px; right: 16px; }
+.flow-turn--se { bottom: 16px; right: 16px; }
+.flow-turn--sw { bottom: 16px; left: 16px; }
+.flow-turn--nw { top: 16px; left: 16px; }
+
+.philosophy-quote {
+  font-family: var(--font-slogan);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+}
 
 .cert-note {
   margin-top: 48px;
@@ -845,6 +1069,7 @@ section { padding: 110px 0; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
   section { padding: 72px 0; }
   .hero { padding: 110px 0 88px; }
+  .philosophy-list { grid-template-columns: 1fr; gap: 40px; }
 }
 
 @media (max-width: 720px) {
@@ -897,4 +1122,11 @@ section { padding: 110px 0; }
     -webkit-line-clamp: 5;
   }
   .review-card .review-author { font-size: 10.5px; }
+
+  .philosophy-flow--linear { gap: 5px; }
+  .p-icon-circle { width: 32px; height: 32px; }
+  .p-icon-circle.is-result { width: 38px; height: 38px; }
+  .p-icon { width: 16px; height: 16px; }
+  .flow-arrow { font-size: 12px; }
+  .philosophy-flow--circle { width: 110px; height: 110px; }
 }
