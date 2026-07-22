@@ -215,35 +215,6 @@ section { padding: 110px 0; }
 @keyframes blobDriftB { from { transform: translate(0,0) scale(1); } to { transform: translate(-20px,-16px) scale(1.08); } }
 @keyframes blobDriftC { from { transform: translate(0,0) scale(1); } to { transform: translate(-14px,20px) scale(0.95); } }
 
-.hero-particles { position: absolute; inset: 0; }
-
-.hero-particle {
-  position: absolute;
-  bottom: -30px;
-  width: 8px;
-  height: 12px;
-  background: var(--color-sub);
-  opacity: 0;
-  border-radius: 0 60% 0 60%;
-  animation: leafRise linear infinite;
-}
-.hero-particle:nth-child(1) { left: 8%;  --drift: 22px; width: 7px;  height: 10px; animation-duration: 15s; animation-delay: 0s; }
-.hero-particle:nth-child(2) { left: 18%; --drift: -18px; width: 9px; height: 13px; animation-duration: 19s; animation-delay: 2s; }
-.hero-particle:nth-child(3) { left: 30%; --drift: 16px;  width: 6px; height: 9px;  animation-duration: 13s; animation-delay: 5s; }
-.hero-particle:nth-child(4) { left: 44%; --drift: -24px; width: 8px; height: 12px; animation-duration: 17s; animation-delay: 1s; }
-.hero-particle:nth-child(5) { left: 58%; --drift: 20px;  width: 7px; height: 11px; animation-duration: 21s; animation-delay: 4s; }
-.hero-particle:nth-child(6) { left: 68%; --drift: -16px; width: 9px; height: 13px; animation-duration: 14s; animation-delay: 7s; }
-.hero-particle:nth-child(7) { left: 78%; --drift: 18px;  width: 6px; height: 9px;  animation-duration: 18s; animation-delay: 3s; }
-.hero-particle:nth-child(8) { left: 88%; --drift: -20px; width: 8px; height: 12px; animation-duration: 16s; animation-delay: 6s; }
-.hero-particle:nth-child(9) { left: 95%; --drift: 14px;  width: 7px; height: 10px; animation-duration: 20s; animation-delay: 9s; }
-
-@keyframes leafRise {
-  0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-  10%  { opacity: 0.4; }
-  90%  { opacity: 0.4; }
-  100% { transform: translate(var(--drift, 20px), -420px) rotate(180deg); opacity: 0; }
-}
-
 /* 히어로 라인 드로잉 (산·바다·태양·나무) */
 .hero-scene {
   display: block;
@@ -302,10 +273,9 @@ section { padding: 110px 0; }
     stroke-dashoffset: 0;
     opacity: 1;
   }
-  .hero-blob, .hero-particle, .amb-pulse, .amb-sway, .amb-shimmer {
+  .hero-blob, .amb-pulse, .amb-sway, .amb-shimmer {
     animation: none;
   }
-  .hero-particle { opacity: 0; }
 }
 
 .hero-wordmark {
