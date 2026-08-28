@@ -568,102 +568,17 @@ section { padding: 110px 0; }
   margin: 0 0 24px;
 }
 
-/* 아이콘 공통 */
-.p-icon-circle {
-  width: 46px;
-  height: 46px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--color-beige);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
-}
-.p-icon-circle.is-result {
-  width: 52px;
-  height: 52px;
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-}
-.p-icon {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: var(--color-main-light);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.is-result .p-icon { stroke: var(--color-bg); }
-
-.philosophy-card:hover .p-icon-circle {
-  transform: translateY(-3px);
-  border-color: var(--color-accent);
+/* 약속 카드 일러스트 */
+.philosophy-img {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 0 auto 20px;
+  transition: transform 0.4s ease;
 }
 
-.flow-arrow {
-  font-size: 15px;
-  color: var(--color-sub);
-  flex: 0 0 auto;
-}
-
-/* 흐름: 가로 일렬 (②④) */
-.philosophy-flow--linear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-/* 흐름: 4가지가 하나로 모임 (①) */
-.philosophy-flow--converge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-.flow-sources {
-  display: flex;
-  gap: 14px;
-}
-.flow-arrow--down { line-height: 1; }
-
-/* 흐름: 원형 연결 (③) */
-.philosophy-flow--circle {
-  position: relative;
-  width: 132px;
-  height: 132px;
-  margin: 0 auto 24px;
-}
-.flow-ring {
-  position: absolute;
-  inset: 20px;
-  border: 1px dashed var(--color-border);
-  border-radius: 50%;
-}
-.p-node { position: absolute; }
-.p-node--top { top: 0; left: 50%; transform: translateX(-50%); }
-.p-node--right { top: 50%; right: 0; transform: translateY(-50%); }
-.p-node--bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
-.p-node--left { top: 50%; left: 0; transform: translateY(-50%); }
-.philosophy-card:hover .p-node--top { transform: translateX(-50%) translateY(-3px); }
-.philosophy-card:hover .p-node--bottom { transform: translateX(-50%) translateY(3px); }
-.philosophy-card:hover .p-node--left { transform: translateY(-50%) translateX(-3px); }
-.philosophy-card:hover .p-node--right { transform: translateY(-50%) translateX(3px); }
-
-.flow-turn {
-  position: absolute;
-  font-size: 14px;
-  color: var(--color-sub);
-}
-.flow-turn--ne { top: 16px; right: 16px; }
-.flow-turn--se { bottom: 16px; right: 16px; }
-.flow-turn--sw { bottom: 16px; left: 16px; }
-.flow-turn--nw { top: 16px; left: 16px; }
+.philosophy-card:hover .philosophy-img { transform: scale(1.03); }
 
 .philosophy-quote {
   font-family: var(--font-slogan);
@@ -1054,10 +969,5 @@ section { padding: 110px 0; }
   }
   .review-card .review-author { font-size: 10.5px; }
 
-  .philosophy-flow--linear { gap: 5px; }
-  .p-icon-circle { width: 32px; height: 32px; }
-  .p-icon-circle.is-result { width: 38px; height: 38px; }
-  .p-icon { width: 16px; height: 16px; }
-  .flow-arrow { font-size: 12px; }
-  .philosophy-flow--circle { width: 110px; height: 110px; }
+  .philosophy-img { max-width: 240px; }
 }
