@@ -107,6 +107,12 @@ section { padding: 110px 0; }
 }
 .btn-outline:hover { background: var(--color-main); color: var(--color-bg); }
 
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
 .btn-sm { padding: 9px 18px; font-size: 12.5px; }
 
 /* ===== Header ===== */
@@ -139,13 +145,6 @@ section { padding: 110px 0; }
   color: var(--color-text);
 }
 .nav-menu a:hover { color: var(--color-accent); }
-
-.nav-admin-link {
-  color: var(--color-text-soft) !important;
-  font-size: 12px !important;
-  padding-left: 12px;
-  border-left: 1px solid var(--color-border);
-}
 
 .nav-cta { display: flex; align-items: center; gap: 16px; }
 
@@ -633,21 +632,6 @@ section { padding: 110px 0; }
   margin: 0 0 6px;
 }
 .how-step p { font-size: 13px; color: var(--color-text-soft); margin: 0; }
-
-.tips-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.tip-card {
-  background: var(--color-paper);
-  border-radius: 2px;
-  padding: 20px;
-  border: 1px solid var(--color-border);
-  font-size: 13.5px;
-  color: var(--color-text-soft);
-}
 
 /* ===== Reviews ===== */
 .reviews {

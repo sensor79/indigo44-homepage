@@ -11,8 +11,11 @@
 <meta property="og:title" content="인디고포포 | 친환경 라이프스타일 브랜드">
 <meta property="og:description" content="인디고포포는 일상 속 친환경 전환을 제안합니다. 고체 비누를 비롯한 지속가능한 제품을 만나보세요.">
 <meta property="og:type" content="website">
-<!-- [OG 대표 이미지 준비 필요: 1200×630px] -->
-<meta property="og:image" content="assets/images/og-image.jpg">
+<meta property="og:url" content="https://sensor79.github.io/indigo44-homepage/">
+<meta property="og:image" content="https://sensor79.github.io/indigo44-homepage/assets/images/og-image.jpg">
+
+<link rel="canonical" href="https://sensor79.github.io/indigo44-homepage/">
+<link rel="icon" type="image/png" href="assets/images/favicon.png">
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin
@@ -20,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=29">
+<link rel="stylesheet" href="css/style.css?v=31">
 </head>
 <body>
 
@@ -28,17 +31,16 @@
 <header class="site-header" id="siteHeader">
   <div class="container">
     <a href="#" class="logo"><img src="assets/images/logo-indigo.png" alt="indigo44" class="logo-img"></a>
-    <nav class="nav-menu">
+    <nav class="nav-menu" id="navMenu">
       <a href="#about">브랜드 이야기</a>
       <a href="#products">제품</a>
       <a href="#standard">약속</a>
       <a href="#how-to">사용법</a>
       <a href="#faq">FAQ</a>
-      <a href="admin.html" class="nav-admin-link">관리자</a>
     </nav>
     <div class="nav-cta">
       <a class="btn btn-outline btn-sm" href="https://smartstore.naver.com/indigo44" target="_blank" rel="noopener">구매하러 가기</a>
-      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -179,7 +181,6 @@
 
     <p class="cert-note">
       ⚠️ 인증 표시는 실제로 인증을 받은 제품에만 개별 표기됩니다 (예: 11365 — 비건 인증).
-      [제품별 인증 목록 최종 확정 필요]
     </p>
   </div>
 </section>
@@ -207,11 +208,6 @@
         <h3>건조 보관</h3>
         <p>물기가 잘 빠지는 트레이에 두어 건조하게 보관합니다.</p>
       </div>
-    </div>
-
-    <div class="tips-list">
-      <div class="tip-card">[일상 속 친환경 실천 팁 콘텐츠 준비 예정]</div>
-      <div class="tip-card">[일상 속 친환경 실천 팁 콘텐츠 준비 예정]</div>
     </div>
   </div>
 </section>
@@ -263,13 +259,12 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; 2026 indigo44. All rights reserved.</span>
-      <span>[문의 폼 도입 시 개인정보처리방침 페이지 추가 필요]</span>
     </div>
   </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
+<script src="js/supabase-client.js?v=2"></script>
 <!-- 후기 전체 보기 (모달) -->
 <div id="reviewViewModal" class="review-modal" hidden>
   <div class="review-modal-box" role="dialog" aria-modal="true" aria-label="후기 전체 보기">
@@ -285,6 +280,6 @@
   </div>
 </div>
 
-<script src="js/main.js?v=4"></script>
+<script src="js/main.js?v=8"></script>
 </body>
 </html>

@@ -8,15 +8,18 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/admin.css?v=3">
+<link rel="stylesheet" href="css/style.css?v=31">
+<link rel="stylesheet" href="css/admin.css?v=5">
 </head>
 <body class="admin-body">
 
 <header class="admin-header">
   <div class="admin-header-inner">
     <span class="admin-logo">indigo44 관리자</span>
-    <button id="logoutBtn" class="btn btn-outline btn-sm" hidden>로그아웃</button>
+    <div class="admin-header-actions">
+      <a href="index.html" target="_blank" rel="noopener" class="btn btn-outline btn-sm">홈페이지 보기</a>
+      <button id="logoutBtn" class="btn btn-outline btn-sm" hidden>로그아웃</button>
+    </div>
   </div>
 </header>
 
@@ -32,6 +35,8 @@
       <button type="submit" class="btn btn-primary">로그인</button>
       <p id="loginError" class="admin-error" hidden></p>
     </form>
+    <button type="button" id="forgotPasswordBtn" class="admin-link-btn">비밀번호를 잊으셨나요?</button>
+    <p id="forgotPasswordMsg" class="admin-status" hidden></p>
   </section>
 
   <!-- 최초 비밀번호 설정 화면 -->
@@ -93,7 +98,7 @@
 
 <!-- 카테고리 편집 폼 (모달) -->
 <div id="categoryModal" class="admin-modal" hidden>
-  <div class="admin-modal-box">
+  <div class="admin-modal-box" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
     <h3 id="categoryModalTitle">카테고리 추가</h3>
     <form id="categoryForm" class="admin-form">
       <input type="hidden" id="categoryId">
@@ -116,7 +121,7 @@
 
 <!-- 제품 편집 폼 (모달) -->
 <div id="productModal" class="admin-modal" hidden>
-  <div class="admin-modal-box">
+  <div class="admin-modal-box" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
     <h3 id="productModalTitle">제품 추가</h3>
     <form id="productForm" class="admin-form">
       <input type="hidden" id="productId">
@@ -128,6 +133,14 @@
       <label>주요 성분<textarea id="productIngredients" rows="2"></textarea></label>
       <label>가격 (원)<input type="number" id="productPrice" min="0" required></label>
       <label>구매 링크<input type="url" id="productPurchaseUrl"></label>
+      <label>공개 상태
+        <select id="productStatus">
+          <option value="active">판매중</option>
+          <option value="sold-out">품절</option>
+          <option value="coming-soon">준비중</option>
+          <option value="hidden">비공개</option>
+        </select>
+      </label>
       <label class="admin-checkbox-group">인증
         <span><label><input type="checkbox" id="certVegan" value="vegan"> 비건 인증</label></span>
         <span><label><input type="checkbox" id="certSkinTest" value="skin-test"> 피부자극 테스트 인증</label></span>
@@ -138,6 +151,7 @@
         <input type="file" id="productImageFile" accept="image/*">
       </label>
       <img id="productImagePreview" class="admin-image-preview" hidden>
+      <button type="button" class="btn btn-outline btn-sm" id="productImageRemoveBtn" hidden>이미지 삭제</button>
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="productSortOrder" value="0"></label>
       <div class="admin-modal-actions">
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
@@ -150,12 +164,13 @@
 
 <!-- FAQ 편집 폼 (모달) -->
 <div id="faqModal" class="admin-modal" hidden>
-  <div class="admin-modal-box">
+  <div class="admin-modal-box" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
     <h3 id="faqModalTitle">FAQ 추가</h3>
     <form id="faqForm" class="admin-form">
       <input type="hidden" id="faqId">
       <label>질문<input type="text" id="faqQuestion" required></label>
       <label>답변<textarea id="faqAnswer" rows="4" required></textarea></label>
+      <label class="admin-checkbox-inline"><input type="checkbox" id="faqPublished" checked> 공개</label>
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="faqSortOrder" value="0"></label>
       <div class="admin-modal-actions">
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
@@ -168,7 +183,7 @@
 
 <!-- 후기 편집 폼 (모달) -->
 <div id="reviewModal" class="admin-modal" hidden>
-  <div class="admin-modal-box">
+  <div class="admin-modal-box" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
     <h3 id="reviewModalTitle">후기 추가</h3>
     <form id="reviewForm" class="admin-form">
       <input type="hidden" id="reviewId">
@@ -187,6 +202,8 @@
         <input type="file" id="reviewImageFile" accept="image/*">
       </label>
       <img id="reviewImagePreview" class="admin-image-preview" hidden>
+      <button type="button" class="btn btn-outline btn-sm" id="reviewImageRemoveBtn" hidden>이미지 삭제</button>
+      <label class="admin-checkbox-inline"><input type="checkbox" id="reviewPublished" checked> 공개</label>
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="reviewSortOrder" value="0"></label>
       <div class="admin-modal-actions">
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
@@ -198,7 +215,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/admin.js?v=2"></script>
+<script src="js/supabase-client.js?v=2"></script>
+<script src="js/admin.js?v=5"></script>
 </body>
 </html>
