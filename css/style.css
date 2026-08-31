@@ -894,6 +894,17 @@ section { padding: 110px 0; }
   opacity: 0.6;
 }
 
+/* ===== Accessibility ===== */
+/* 마우스 클릭 시엔 기존처럼 아웃라인 없이, 키보드 포커스일 때만 표시합니다. */
+a:focus-visible,
+button:focus-visible,
+.category-tab:focus-visible,
+.faq-question:focus-visible,
+.review-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 860px) {
   .about-grid { grid-template-columns: 1fr; gap: 40px; }

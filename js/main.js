@@ -39,6 +39,9 @@ const FALLBACK_FAQS = [
   }
 ];
 
+// 아래 두 상수는 더 이상 화면에 렌더링되지 않습니다. Supabase 조회가 실패했을 때
+// 임의의 가격·성분·인증 정보를 실제 제품처럼 보여주면 방문자에게 허위 정보가
+// 될 수 있어서입니다 (loadProducts 참고). 데이터 형태 참고용으로만 남겨둡니다.
 const FALLBACK_CATEGORIES = [
   { id: 'fallback-cat-soap', name: '고체비누', status: 'active', sort_order: 0 },
   { id: 'fallback-cat-care', name: '바디케어', status: 'active', sort_order: 1 }
@@ -312,61 +315,59 @@ async function loadProducts() {
   const tabsEl = document.getElementById('categoryTabs');
   const gridEl = document.getElementById('productGrid');
 
+  let categories;
   try {
-    const categories = await fetchCategoriesWithProducts();
-
-    categories.forEach((cat, i) => {
-      const tab = document.createElement('button');
-      tab.className = 'category-tab' + (i === 0 ? ' active' : '');
-      tab.textContent = cat.name + (cat.status === 'coming-soon' ? ' (준비중)' : '');
-      tab.dataset.categoryId = cat.id;
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        renderProducts(cat, gridEl);
-      });
-      tabsEl.appendChild(tab);
-    });
-
-    if (categories.length) {
-      renderProducts(categories[0], gridEl);
-    } else {
-      gridEl.innerHTML = '<p class="category-empty">등록된 제품이 없어요.</p>';
-    }
+    categories = await fetchCategoriesWithProducts();
   } catch (err) {
-    gridEl.innerHTML = '<p class="category-empty">제품 정보를 불러오지 못했습니다.</p>';
+    // 조회 자체가 실패한 경우: 임의의 예시 가격·성분·인증을 실제 제품처럼
+    // 보여주지 않고, 안내 문구만 표시한다.
+    tabsEl.innerHTML = '';
+    gridEl.innerHTML = '<p class="category-empty">제품 정보를 불러오지 못했습니다. 잠시 후 다시 확인해주세요.</p>';
     console.error('제품 데이터를 불러오는 중 오류가 발생했습니다.', err);
+    return;
+  }
+
+  categories.forEach((cat, i) => {
+    const tab = document.createElement('button');
+    tab.className = 'category-tab' + (i === 0 ? ' active' : '');
+    tab.textContent = cat.name + (cat.status === 'coming-soon' ? ' (준비중)' : '');
+    tab.dataset.categoryId = cat.id;
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderProducts(cat, gridEl);
+    });
+    tabsEl.appendChild(tab);
+  });
+
+  // 조회는 성공했지만 실제로 등록된 카테고리/제품이 0건인 경우(정상 빈 상태).
+  if (categories.length) {
+    renderProducts(categories[0], gridEl);
+  } else {
+    gridEl.innerHTML = '<p class="category-empty">등록된 제품이 없어요.</p>';
   }
 }
 
 async function fetchCategoriesWithProducts() {
-  try {
-    const { data: categories, error: catErr } = await supabaseClient
-      .from('categories')
-      .select('*')
-      .order('sort_order', { ascending: true });
-    if (catErr) throw catErr;
+  if (!supabaseClient) throw new Error('Supabase client not available');
 
-    const { data: products, error: prodErr } = await supabaseClient
-      .from('products')
-      .select('*')
-      .neq('status', 'hidden')
-      .order('sort_order', { ascending: true });
-    if (prodErr) throw prodErr;
+  const { data: categories, error: catErr } = await supabaseClient
+    .from('categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (catErr) throw catErr;
 
-    // 요청이 성공했다면(빈 배열이라도) 실제 조회 결과를 그대로 쓴다.
-    // 예시 데이터는 요청 자체가 실패했을 때(catch 블록)만 사용한다.
-    return (categories || []).map(cat => ({
-      ...cat,
-      products: (products || []).filter(p => p.category_id === cat.id && p.status !== 'hidden')
-    }));
-  } catch (err) {
-    console.warn('제품 데이터를 불러오지 못해 기본 예시를 표시합니다.', err);
-    return FALLBACK_CATEGORIES.map(cat => ({
-      ...cat,
-      products: FALLBACK_PRODUCTS.filter(p => p.category_id === cat.id && p.status !== 'hidden')
-    }));
-  }
+  const { data: products, error: prodErr } = await supabaseClient
+    .from('products')
+    .select('*')
+    .neq('status', 'hidden')
+    .order('sort_order', { ascending: true });
+  if (prodErr) throw prodErr;
+
+  return (categories || []).map(cat => ({
+    ...cat,
+    products: (products || []).filter(p => p.category_id === cat.id && p.status !== 'hidden')
+  }));
 }
 
 function renderProducts(category, gridEl) {
