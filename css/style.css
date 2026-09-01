@@ -609,6 +609,15 @@ section { padding: 110px 0; }
 
 .how-step { text-align: center; padding: 24px 16px; }
 
+.how-step-img {
+  display: block;
+  width: min(100%, 200px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  margin: 24px auto 0;
+}
+
 .how-step .step-num {
   width: 40px;
   height: 40px;
@@ -965,4 +974,5 @@ button:focus-visible,
   .review-card .review-author { font-size: 10.5px; }
 
   .philosophy-img { max-width: 240px; }
+  .how-step-img { width: min(100%, 180px); }
 }
