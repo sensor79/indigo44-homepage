@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="css/style.css?v=34">
-<link rel="stylesheet" href="css/admin.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=35">
+<link rel="stylesheet" href="css/admin.css?v=7">
 </head>
 <body class="admin-body">
 
@@ -17,6 +17,7 @@
   <div class="admin-header-inner">
     <span class="admin-logo">indigo44 관리자</span>
     <div class="admin-header-actions">
+      <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="btn btn-outline btn-sm">방문자 통계</a>
       <a href="index.html" target="_blank" rel="noopener" class="btn btn-outline btn-sm">홈페이지 보기</a>
       <button id="logoutBtn" class="btn btn-outline btn-sm" hidden>로그아웃</button>
     </div>
@@ -33,10 +34,10 @@
       <label>이메일<input type="email" id="loginEmail" required autocomplete="username"></label>
       <label>비밀번호<input type="password" id="loginPassword" required autocomplete="current-password"></label>
       <button type="submit" class="btn btn-primary">로그인</button>
-      <p id="loginError" class="admin-error" hidden></p>
+      <p id="loginError" class="admin-error" role="alert" aria-live="assertive" hidden></p>
     </form>
     <button type="button" id="forgotPasswordBtn" class="admin-link-btn">비밀번호를 잊으셨나요?</button>
-    <p id="forgotPasswordMsg" class="admin-status" hidden></p>
+    <p id="forgotPasswordMsg" class="admin-status" role="status" aria-live="polite" hidden></p>
   </section>
 
   <!-- 최초 비밀번호 설정 화면 -->
@@ -47,12 +48,24 @@
       <label>새 비밀번호<input type="password" id="newPassword" minlength="6" required autocomplete="new-password"></label>
       <label>비밀번호 확인<input type="password" id="newPasswordConfirm" minlength="6" required autocomplete="new-password"></label>
       <button type="submit" class="btn btn-primary">설정하고 시작하기</button>
-      <p id="setPasswordError" class="admin-error" hidden></p>
+      <p id="setPasswordError" class="admin-error" role="alert" aria-live="assertive" hidden></p>
     </form>
   </section>
 
   <!-- 대시보드 -->
   <section id="dashboardView" hidden>
+
+    <p id="dashboardLoading" class="admin-status" role="status" aria-live="polite" hidden>데이터를 불러오는 중...</p>
+
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>데이터 백업</h2>
+        <button id="backupBtn" class="btn btn-outline btn-sm">백업 다운로드</button>
+      </div>
+      <p class="admin-desc">카테고리·제품·FAQ·후기·공지사항 데이터를 JSON 파일로 내려받습니다. Storage 이미지 파일 자체는 포함되지 않고 이미지 주소만 포함돼요.</p>
+      <p class="admin-empty">Supabase 무료 플랜은 별도 정기 백업(PITR)을 제공하지 않아요. 중요한 변경 후에는 이 버튼으로 직접 백업해두는 것을 권장해요.</p>
+      <p id="backupStatus" class="admin-status" role="status" aria-live="polite" hidden></p>
+    </div>
 
     <div class="admin-section">
       <div class="admin-section-head">
@@ -71,6 +84,7 @@
           <button id="addProductBtn" class="btn btn-outline btn-sm">+ 제품 추가</button>
         </div>
       </div>
+      <p id="addProductHint" class="admin-empty" hidden>먼저 카테고리를 추가해주세요.</p>
       <div id="productList" class="admin-product-list"></div>
     </div>
 
@@ -90,9 +104,17 @@
       <div id="reviewAdminList" class="admin-review-list"></div>
     </div>
 
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>공지사항</h2>
+        <button id="addNoticeBtn" class="btn btn-outline btn-sm">+ 공지사항 추가</button>
+      </div>
+      <div id="noticeAdminList" class="admin-notice-list"></div>
+    </div>
+
   </section>
 
-  <p id="statusMsg" class="admin-status" hidden></p>
+  <p id="statusMsg" class="admin-status" role="status" aria-live="polite" hidden></p>
 
 </main>
 
@@ -113,7 +135,7 @@
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="categorySortOrder" value="0"></label>
       <div class="admin-modal-actions">
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
-        <button type="submit" class="btn btn-primary">저장</button>
+        <button type="submit" class="btn btn-primary" id="categorySaveBtn">저장</button>
       </div>
     </form>
   </div>
@@ -147,17 +169,17 @@
         <span><label><input type="checkbox" id="certHeavyMetalFree" value="heavy-metal-free"> 무중금속 인증</label></span>
         <span><label><input type="checkbox" id="certAntibacterial" value="antibacterial"> 항균테스트 인증</label></span>
       </label>
-      <label>제품 사진
-        <input type="file" id="productImageFile" accept="image/*">
+      <label>제품 사진 (JPEG/PNG/WebP, 최대 10MB — 자동으로 720px 이하 JPEG로 최적화됩니다)
+        <input type="file" id="productImageFile" accept="image/jpeg,image/png,image/webp">
       </label>
-      <img id="productImagePreview" class="admin-image-preview" hidden>
+      <img id="productImagePreview" class="admin-image-preview" alt="제품 이미지 미리보기" hidden>
       <button type="button" class="btn btn-outline btn-sm" id="productImageRemoveBtn" hidden>이미지 삭제</button>
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="productSortOrder" value="0"></label>
       <div class="admin-modal-actions">
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
         <button type="submit" class="btn btn-primary" id="productSaveBtn">저장</button>
       </div>
-      <p id="productFormError" class="admin-error" hidden></p>
+      <p id="productFormError" class="admin-error" role="alert" aria-live="assertive" hidden></p>
     </form>
   </div>
 </div>
@@ -174,9 +196,9 @@
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="faqSortOrder" value="0"></label>
       <div class="admin-modal-actions">
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
-        <button type="submit" class="btn btn-primary">저장</button>
+        <button type="submit" class="btn btn-primary" id="faqSaveBtn">저장</button>
       </div>
-      <p id="faqFormError" class="admin-error" hidden></p>
+      <p id="faqFormError" class="admin-error" role="alert" aria-live="assertive" hidden></p>
     </form>
   </div>
 </div>
@@ -198,10 +220,10 @@
           <option value="1">★☆☆☆☆ (1점)</option>
         </select>
       </label>
-      <label>후기 이미지 (선택 — 넣으면 별점 대신 이미지가 표시돼요)
-        <input type="file" id="reviewImageFile" accept="image/*">
+      <label>후기 이미지 (선택 — JPEG/PNG/WebP, 최대 10MB, 넣으면 별점 대신 이미지가 표시돼요)
+        <input type="file" id="reviewImageFile" accept="image/jpeg,image/png,image/webp">
       </label>
-      <img id="reviewImagePreview" class="admin-image-preview" hidden>
+      <img id="reviewImagePreview" class="admin-image-preview" alt="후기 이미지 미리보기" hidden>
       <button type="button" class="btn btn-outline btn-sm" id="reviewImageRemoveBtn" hidden>이미지 삭제</button>
       <label class="admin-checkbox-inline"><input type="checkbox" id="reviewPublished" checked> 공개</label>
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="reviewSortOrder" value="0"></label>
@@ -209,13 +231,44 @@
         <button type="button" class="btn btn-outline" data-close-modal>취소</button>
         <button type="submit" class="btn btn-primary" id="reviewSaveBtn">저장</button>
       </div>
-      <p id="reviewFormError" class="admin-error" hidden></p>
+      <p id="reviewFormError" class="admin-error" role="alert" aria-live="assertive" hidden></p>
+    </form>
+  </div>
+</div>
+
+<!-- 공지사항 편집 폼 (모달) -->
+<div id="noticeModal" class="admin-modal" hidden>
+  <div class="admin-modal-box" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
+    <h3 id="noticeModalTitle">공지사항 추가</h3>
+    <form id="noticeForm" class="admin-form">
+      <input type="hidden" id="noticeId">
+      <label>제목<input type="text" id="noticeTitle" required></label>
+      <label>본문<textarea id="noticeContent" rows="5" required></textarea></label>
+      <label>공지 유형
+        <select id="noticeType">
+          <option value="general">일반</option>
+          <option value="shipping">배송</option>
+          <option value="product">제품</option>
+          <option value="event">이벤트</option>
+          <option value="important">중요</option>
+        </select>
+      </label>
+      <label class="admin-checkbox-inline"><input type="checkbox" id="noticePublished"> 공개</label>
+      <label class="admin-checkbox-inline"><input type="checkbox" id="noticePinned"> 상단 고정</label>
+      <label>게시 시작일 (선택)<input type="datetime-local" id="noticeStartsAt"></label>
+      <label>게시 종료일 (선택)<input type="datetime-local" id="noticeEndsAt"></label>
+      <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="noticeSortOrder" value="0"></label>
+      <div class="admin-modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>취소</button>
+        <button type="submit" class="btn btn-primary" id="noticeSaveBtn">저장</button>
+      </div>
+      <p id="noticeFormError" class="admin-error" role="alert" aria-live="assertive" hidden></p>
     </form>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
 <script src="js/supabase-client.js?v=2"></script>
-<script src="js/admin.js?v=5"></script>
+<script src="js/admin.js?v=8"></script>
 </body>
 </html>

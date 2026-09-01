@@ -24,6 +24,31 @@ function formatPrice(price) {
   return (Number(price) || 0).toLocaleString('ko-KR');
 }
 
+// 관리자에서 저장한 구매 링크가 비었거나 손상된 값이어도 안전하게 처리합니다.
+// javascript:, data: 등 위험한 스킴은 new URL()로 실제 파싱해 protocol을 검사한 뒤 걸러냅니다.
+function isValidHttpUrl(value) {
+  if (typeof value !== 'string' || !value) return false;
+  if (!/^https?:\/\//i.test(value)) return false;
+  try {
+    const u = new URL(value);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function isValidDateValue(value) {
+  return !Number.isNaN(new Date(value).getTime());
+}
+
+const NOTICE_TYPE_LABELS = {
+  general: '일반',
+  shipping: '배송',
+  product: '제품',
+  event: '이벤트',
+  important: '중요'
+};
+
 const FALLBACK_FAQS = [
   {
     question: '배송은 얼마나 걸리나요?',
@@ -95,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProducts();
   loadFaqs();
   loadReviews();
+  loadNotices();
 });
 
 function initNavToggle() {
@@ -395,13 +421,16 @@ function renderProducts(category, gridEl) {
       .map(c => `<span class="tag">${escapeHtml(CERT_LABELS[c] || c)}</span>`)
       .join('');
 
+    const hasPurchaseUrl = isValidHttpUrl(product.purchase_url);
     const purchaseHtml = (isSoldOut || isComingSoon)
       ? `<span class="btn btn-outline btn-sm" aria-disabled="true">${isSoldOut ? '품절' : '준비중'}</span>`
-      : `<a class="btn btn-primary btn-sm" href="${escapeHtml(product.purchase_url)}" target="_blank" rel="noopener">구매하기</a>`;
+      : hasPurchaseUrl
+        ? `<a class="btn btn-primary btn-sm" href="${escapeHtml(product.purchase_url)}" target="_blank" rel="noopener">구매하기</a>`
+        : `<span class="btn btn-outline btn-sm" aria-disabled="true">준비중</span>`;
 
     card.innerHTML = `
       <div class="thumb">
-        <img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" loading="lazy" width="800" height="800">
+        <img src="${escapeHtml(product.image_url || 'assets/images/placeholder-product.svg')}" alt="${escapeHtml(product.name)}" loading="lazy" width="800" height="800">
       </div>
       <div class="product-body">
         <h3 class="product-name">${escapeHtml(product.name)}</h3>
@@ -416,4 +445,120 @@ function renderProducts(category, gridEl) {
     `;
     gridEl.appendChild(card);
   });
+}
+
+// ===== 공지사항 =====
+
+function initNoticeAccordion() {
+  const list = document.getElementById('noticeList');
+  if (!list || list.dataset.bound) return;
+  list.dataset.bound = 'true';
+  list.addEventListener('click', (e) => {
+    const question = e.target.closest('.notice-question');
+    if (!question) return;
+    const item = question.closest('.notice-item');
+    const answer = item.querySelector('.notice-answer');
+    const isOpen = item.classList.contains('open');
+
+    list.querySelectorAll('.notice-item.open').forEach(el => {
+      el.classList.remove('open');
+      el.querySelector('.notice-question').setAttribute('aria-expanded', 'false');
+      const openAnswer = el.querySelector('.notice-answer');
+      openAnswer.style.maxHeight = '';
+      openAnswer.setAttribute('aria-hidden', 'true');
+    });
+
+    if (!isOpen) {
+      item.classList.add('open');
+      question.setAttribute('aria-expanded', 'true');
+      answer.setAttribute('aria-hidden', 'false');
+      // 긴 공지 본문이 고정 max-height에 잘리지 않도록, 실제 콘텐츠 높이
+      // (scrollHeight)를 읽어 그만큼만 펼칩니다.
+      answer.style.maxHeight = answer.scrollHeight + 'px';
+    }
+  });
+}
+
+function formatNoticeDate(iso) {
+  if (!iso || !isValidDateValue(iso)) return '';
+  try {
+    return new Date(iso).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+// notices 테이블 조회 실패(테이블 미생성 포함)·공지 0건·날짜 손상 등 어떤
+// 경우에도 홈페이지에는 오류 화면 대신 섹션을 조용히 숨깁니다. 다른 섹션
+// (제품·FAQ·후기) 로딩과는 완전히 독립적으로 동작합니다.
+async function loadNotices() {
+  const section = document.getElementById('notices');
+  if (!section) return;
+
+  if (!supabaseClient) {
+    section.hidden = true;
+    return;
+  }
+
+  let rows = [];
+  try {
+    const { data, error } = await supabaseClient
+      .from('site_notices')
+      .select('*')
+      .eq('published', true)
+      .order('pinned', { ascending: false })
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    rows = data || [];
+  } catch (err) {
+    console.warn('공지사항을 불러오지 못했습니다.', err);
+    section.hidden = true;
+    return;
+  }
+
+  const now = Date.now();
+  const visible = rows.filter(n => {
+    // RLS가 게시 기간을 이미 걸러주지만, 날짜 값이 깨져 있을 가능성까지
+    // 고려해 클라이언트에서도 한 번 더 검증합니다.
+    if (n.starts_at) {
+      if (!isValidDateValue(n.starts_at)) return false;
+      if (new Date(n.starts_at).getTime() > now) return false;
+    }
+    if (n.ends_at) {
+      if (!isValidDateValue(n.ends_at)) return false;
+      if (new Date(n.ends_at).getTime() < now) return false;
+    }
+    return true;
+  }).slice(0, 5);
+
+  if (visible.length === 0) {
+    section.hidden = true;
+    return;
+  }
+
+  const listEl = document.getElementById('noticeList');
+  listEl.innerHTML = visible.map((notice, i) => {
+    const typeLabel = NOTICE_TYPE_LABELS[notice.notice_type] || '일반';
+    const dateLabel = formatNoticeDate(notice.created_at);
+    return `
+      <div class="notice-item">
+        <h3 class="notice-item-heading">
+          <button class="notice-question" aria-expanded="false" aria-controls="noticeAnswer-${i}">
+            <span class="notice-question-text">
+              ${notice.notice_type === 'important' ? '<span class="notice-important">중요</span>' : ''}
+              ${escapeHtml(notice.title)}
+            </span>
+            <span class="notice-meta">${escapeHtml(typeLabel)}${dateLabel ? ' · ' + dateLabel : ''}</span>
+            <span class="plus">+</span>
+          </button>
+        </h3>
+        <div class="notice-answer" id="noticeAnswer-${i}" aria-hidden="true"><p>${escapeHtml(notice.content)}</p></div>
+      </div>
+    `;
+  }).join('');
+
+  section.hidden = false;
+  initNoticeAccordion();
 }

@@ -21,6 +21,8 @@
 .admin-header-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -84,6 +86,7 @@
 .admin-form input[type="number"],
 .admin-form input[type="url"],
 .admin-form input[type="file"],
+.admin-form input[type="datetime-local"],
 .admin-form select,
 .admin-form textarea {
   font-family: var(--font-body);
@@ -207,6 +210,20 @@
 .admin-row-sub { font-size: 12.5px; color: var(--color-text-soft); }
 .admin-row-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
+.admin-empty {
+  font-size: 13.5px;
+  color: var(--color-text-soft);
+  padding: 12px 0;
+  margin: 0;
+}
+.admin-empty.admin-error { color: #B3402A; }
+
+.btn:disabled,
+.admin-form button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .admin-modal {
   position: fixed;
   inset: 0;
@@ -249,6 +266,9 @@
 }
 
 @media (max-width: 720px) {
+  .admin-header-inner { flex-wrap: wrap; gap: 12px; }
+  .admin-header-actions { width: 100%; justify-content: flex-start; }
+
   .admin-main { padding: 24px 16px 60px; }
   .admin-section { padding: 20px; }
 

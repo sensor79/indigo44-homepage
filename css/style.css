@@ -866,6 +866,87 @@ section { padding: 110px 0; }
 
 .faq-answer p { padding: 0 4px 22px; margin: 0; }
 
+/* ===== Notices ===== */
+.notices { background: var(--color-paper); }
+
+.notice-list { max-width: 760px; margin: 0 auto; }
+
+.notices .section-eyebrow,
+.notices .section-title { display: block; text-align: center; }
+
+.notices .section-title { margin-bottom: 48px; }
+
+.notice-item { border-bottom: 1px solid var(--color-border); }
+.notice-item:first-child { border-top: 1px solid var(--color-border); }
+
+.notice-item-heading { margin: 0; font-weight: inherit; }
+
+.notice-question {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 22px 4px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.notice-question-text { display: flex; align-items: center; gap: 8px; }
+
+.notice-important {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(156, 107, 69, 0.12);
+  border: 1px solid rgba(156, 107, 69, 0.25);
+  color: var(--color-accent);
+}
+
+.notice-meta {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--color-text-soft);
+  font-weight: 400;
+}
+
+.notice-question .plus {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--color-sub);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notice-item.open .notice-question .plus { transform: rotate(45deg); }
+
+.notice-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  font-size: 14px;
+  color: var(--color-text-soft);
+}
+
+/* 열릴 때 max-height는 js/main.js의 initNoticeAccordion이 scrollHeight로 계산해
+   인라인 스타일로 넣어준다 (긴 공지 본문이 고정값에 잘리지 않도록). */
+
+.notice-answer p {
+  padding: 0 4px 22px;
+  margin: 0;
+  white-space: pre-line;
+}
+
 /* ===== Footer ===== */
 .site-footer {
   background: var(--color-main);
@@ -909,6 +990,7 @@ a:focus-visible,
 button:focus-visible,
 .category-tab:focus-visible,
 .faq-question:focus-visible,
+.notice-question:focus-visible,
 .review-card:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
@@ -975,4 +1057,10 @@ button:focus-visible,
 
   .philosophy-img { max-width: 240px; }
   .how-step-img { width: min(100%, 180px); }
+
+  .notice-question {
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+  .notice-meta { font-size: 11px; }
 }
