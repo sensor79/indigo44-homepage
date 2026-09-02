@@ -150,10 +150,16 @@ function initFaqAccordion() {
     list.querySelectorAll('.faq-item.open').forEach(el => {
       el.classList.remove('open');
       el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+      const openAnswer = el.querySelector('.faq-answer');
+      openAnswer.style.maxHeight = '';
+      openAnswer.setAttribute('aria-hidden', 'true');
     });
     if (!isOpen) {
       item.classList.add('open');
       question.setAttribute('aria-expanded', 'true');
+      const answer = item.querySelector('.faq-answer');
+      answer.setAttribute('aria-hidden', 'false');
+      answer.style.maxHeight = answer.scrollHeight + 'px';
     }
   });
 }
@@ -189,7 +195,7 @@ async function loadFaqs() {
   listEl.innerHTML = resolved.map((faq, i) => `
     <div class="faq-item">
       <button class="faq-question" aria-expanded="false" aria-controls="faqAnswer-${i}">${escapeHtml(faq.question)} <span class="plus">+</span></button>
-      <div class="faq-answer" id="faqAnswer-${i}"><p>${escapeHtml(faq.answer)}</p></div>
+      <div class="faq-answer" id="faqAnswer-${i}" aria-hidden="true"><p>${escapeHtml(faq.answer)}</p></div>
     </div>
   `).join('');
 }

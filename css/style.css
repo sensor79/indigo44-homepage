@@ -862,9 +862,12 @@ section { padding: 110px 0; }
   color: var(--color-text-soft);
 }
 
-.faq-item.open .faq-answer { max-height: 300px; }
-
-.faq-answer p { padding: 0 4px 22px; margin: 0; }
+.faq-answer p {
+  padding: 0 4px 22px;
+  margin: 0;
+  line-height: 1.85;
+  white-space: pre-line;
+}
 
 /* ===== Notices ===== */
 .notices { background: var(--color-paper); }
@@ -944,6 +947,7 @@ section { padding: 110px 0; }
 .notice-answer p {
   padding: 0 4px 22px;
   margin: 0;
+  line-height: 1.85;
   white-space: pre-line;
 }
 
