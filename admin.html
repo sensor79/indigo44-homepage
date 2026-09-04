@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="css/style.css?v=36">
+<link rel="stylesheet" href="css/style.css?v=37">
 <link rel="stylesheet" href="css/admin.css?v=7">
 </head>
 <body class="admin-body">
@@ -256,6 +256,7 @@
       </label>
       <label class="admin-checkbox-inline"><input type="checkbox" id="noticePublished"> 공개</label>
       <label class="admin-checkbox-inline"><input type="checkbox" id="noticePinned"> 상단 고정</label>
+      <label class="admin-checkbox-inline"><input type="checkbox" id="noticePopupEnabled"> 팝업으로 표시</label>
       <label>게시 시작일 (선택)<input type="datetime-local" id="noticeStartsAt"></label>
       <label>게시 종료일 (선택)<input type="datetime-local" id="noticeEndsAt"></label>
       <label>정렬 순서 (숫자가 작을수록 먼저 표시)<input type="number" id="noticeSortOrder" value="0"></label>
@@ -270,6 +271,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
 <script src="js/supabase-client.js?v=2"></script>
-<script src="js/admin.js?v=9"></script>
+<script src="js/admin.js?v=10"></script>
 </body>
 </html>

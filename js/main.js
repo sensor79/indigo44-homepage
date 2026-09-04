@@ -500,10 +500,9 @@ function formatNoticeDate(iso) {
 // (제품·FAQ·후기) 로딩과는 완전히 독립적으로 동작합니다.
 async function loadNotices() {
   const section = document.getElementById('notices');
-  if (!section) return;
 
   if (!supabaseClient) {
-    section.hidden = true;
+    if (section) section.hidden = true;
     return;
   }
 
@@ -516,12 +515,12 @@ async function loadNotices() {
       .order('pinned', { ascending: false })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(100);
     if (error) throw error;
     rows = data || [];
   } catch (err) {
     console.warn('공지사항을 불러오지 못했습니다.', err);
-    section.hidden = true;
+    if (section) section.hidden = true;
     return;
   }
 
@@ -538,7 +537,21 @@ async function loadNotices() {
       if (new Date(n.ends_at).getTime() < now) return false;
     }
     return true;
-  }).slice(0, 5);
+  });
+
+  renderNoticeList(section, visible.slice(0, 5));
+
+  // 팝업 노출은 하단 공지 목록과 완전히 독립적으로 처리합니다. 여기서 오류가
+  // 나도 위에서 이미 렌더링된 공지 목록·다른 섹션에는 영향을 주지 않습니다.
+  try {
+    showNoticePopupIfEligible(visible);
+  } catch (err) {
+    console.warn('공지 팝업을 표시하지 못했습니다.', err);
+  }
+}
+
+function renderNoticeList(section, visible) {
+  if (!section) return;
 
   if (visible.length === 0) {
     section.hidden = true;
@@ -569,3 +582,122 @@ async function loadNotices() {
   section.hidden = false;
   initNoticeAccordion();
 }
+
+// ===== 공지 팝업 =====
+// 우선순위(pinned → sort_order → 최신 생성)는 loadNotices의 쿼리 정렬 순서를
+// 그대로 물려받습니다. visible은 이미 그 순서로 정렬돼 있으므로, popup_enabled가
+// true인 첫 항목이 곧 최우선 순위 항목입니다.
+const NOTICE_POPUP_DISMISS_PREFIX = 'indigo44_notice_popup_dismiss_';
+
+function showNoticePopupIfEligible(visibleNotices) {
+  // popup_enabled 컬럼이 아직 없는 오래된 응답(마이그레이션 전)도 false로
+  // 간주해 안전하게 처리합니다.
+  const popupNotice = visibleNotices.find(n => n && n.popup_enabled === true);
+  if (!popupNotice || !popupNotice.id) return;
+  if (isNoticePopupDismissedToday(popupNotice.id)) return;
+  openNoticePopup(popupNotice);
+}
+
+function isNoticePopupDismissedToday(noticeId) {
+  try {
+    const raw = localStorage.getItem(NOTICE_POPUP_DISMISS_PREFIX + noticeId);
+    if (!raw) return false;
+    const expiresAt = Number(raw);
+    if (!Number.isFinite(expiresAt)) return false;
+    return Date.now() < expiresAt;
+  } catch (err) {
+    // localStorage 접근이 막힌 환경(프라이빗 모드 등)에서도 팝업은 정상 노출되게
+    // false를 반환합니다.
+    console.warn('공지 팝업 표시 여부를 확인하지 못했습니다.', err);
+    return false;
+  }
+}
+
+function dismissNoticePopupForToday(noticeId) {
+  try {
+    const nextMidnight = new Date();
+    nextMidnight.setHours(24, 0, 0, 0); // 로컬 기준 다음 날 00:00
+    localStorage.setItem(NOTICE_POPUP_DISMISS_PREFIX + noticeId, String(nextMidnight.getTime()));
+  } catch (err) {
+    console.warn('오늘 하루 보지 않기 설정을 저장하지 못했습니다.', err);
+  }
+}
+
+let noticePopupLastFocus = null;
+
+function openNoticePopup(notice) {
+  const popup = document.getElementById('noticePopup');
+  if (!popup) return;
+
+  const typeLabel = NOTICE_TYPE_LABELS[notice.notice_type] || '일반';
+  document.getElementById('noticePopupType').textContent = typeLabel;
+  document.getElementById('noticePopupTitle').textContent = notice.title || '';
+  // textContent로만 넣어 HTML을 직접 삽입하지 않습니다. 줄바꿈은
+  // css의 white-space: pre-line이 살려줍니다(저장형 XSS 방지).
+  document.getElementById('noticePopupContent').textContent = notice.content || '';
+  popup.dataset.noticeId = notice.id;
+
+  noticePopupLastFocus = document.activeElement;
+  popup.hidden = false;
+  document.body.style.overflow = 'hidden';
+  popup.querySelector('.notice-popup-close').focus();
+}
+
+function closeNoticePopup() {
+  const popup = document.getElementById('noticePopup');
+  if (!popup || popup.hidden) return;
+  popup.hidden = true;
+  document.body.style.overflow = '';
+
+  // 팝업이 페이지 진입과 동시에 자동으로 열렸다면(사용자가 직접 클릭한 게 아니라면)
+  // 열기 전 포커스는 body였을 것이다. <body>는 focus()를 호출해도 포커스를
+  // 옮겨주지 않는(비-focusable) 요소라서, 그 경우엔 현재 포커스(숨겨질 팝업
+  // 안의 버튼)를 그냥 blur해 포커스를 body로 자연스럽게 되돌린다.
+  if (noticePopupLastFocus && noticePopupLastFocus !== document.body && document.body.contains(noticePopupLastFocus)) {
+    noticePopupLastFocus.focus();
+  } else if (document.activeElement && document.activeElement !== document.body) {
+    document.activeElement.blur();
+  }
+  noticePopupLastFocus = null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const popup = document.getElementById('noticePopup');
+  if (!popup) return;
+
+  popup.addEventListener('click', (e) => {
+    if (e.target === popup || e.target.closest('[data-close-notice-popup]')) {
+      closeNoticePopup();
+    }
+  });
+
+  const hideTodayBtn = popup.querySelector('[data-hide-notice-popup-today]');
+  if (hideTodayBtn) {
+    hideTodayBtn.addEventListener('click', () => {
+      const noticeId = popup.dataset.noticeId;
+      if (noticeId) dismissNoticePopupForToday(noticeId);
+      closeNoticePopup();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (popup.hidden) return;
+    if (e.key === 'Escape') {
+      closeNoticePopup();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = Array.from(popup.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+});

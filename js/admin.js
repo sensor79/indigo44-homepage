@@ -1294,7 +1294,7 @@ function renderNoticeAdminList() {
         <strong>${escapeHtml(notice.title)}</strong>
         <span class="admin-row-sub">
           ${escapeHtml(NOTICE_TYPE_LABELS[notice.notice_type] || notice.notice_type)} ·
-          ${notice.published ? '공개' : '비공개'}${notice.pinned ? ' · 상단 고정' : ''} · 순서 ${notice.sort_order}<br>
+          ${notice.published ? '공개' : '비공개'}${notice.pinned ? ' · 상단 고정' : ''}${notice.popup_enabled ? ' · 팝업' : ''} · 순서 ${notice.sort_order}<br>
           게시 기간: ${formatNoticeDate(notice.starts_at)} ~ ${formatNoticeDate(notice.ends_at)}
         </span>
       </div>
@@ -1326,6 +1326,7 @@ function openNoticeModal(id) {
   document.getElementById('noticeType').value = notice ? notice.notice_type : 'general';
   document.getElementById('noticePublished').checked = notice ? !!notice.published : false;
   document.getElementById('noticePinned').checked = notice ? !!notice.pinned : false;
+  document.getElementById('noticePopupEnabled').checked = notice ? !!notice.popup_enabled : false;
   document.getElementById('noticeStartsAt').value = notice ? isoToDatetimeLocal(notice.starts_at) : '';
   document.getElementById('noticeEndsAt').value = notice ? isoToDatetimeLocal(notice.ends_at) : '';
   document.getElementById('noticeSortOrder').value = notice ? notice.sort_order : state.notices.length;
@@ -1370,6 +1371,7 @@ async function onNoticeSubmit(e) {
       notice_type: document.getElementById('noticeType').value,
       published: document.getElementById('noticePublished').checked,
       pinned: document.getElementById('noticePinned').checked,
+      popup_enabled: document.getElementById('noticePopupEnabled').checked,
       starts_at: startsAt,
       ends_at: endsAt,
       sort_order: Number(document.getElementById('noticeSortOrder').value) || 0,
