@@ -1042,12 +1042,38 @@ section { padding: 110px 0; }
 }
 
 @media (max-width: 720px) {
+  /* 모바일에서만: 팝업 바깥 박스는 화면 안에 고정하고, 이미지+본문이 있는
+     .notice-popup-body만 내부에서 세로 스크롤되게 한다. 데스크톱 규칙(위
+     .notice-popup 등)은 그대로 두고 이 미디어쿼리 안에서만 덮어쓴다. */
   .notice-popup {
     left: 12px;
     right: 12px;
     width: auto;
     top: calc(72px + 12px);
+    /* 100vh는 구형/미지원 브라우저용 폴백, 바로 아래 100dvh가 지원되는
+       브라우저(모바일 사파리 포함)에서는 주소창·하단 도구막대가 접히고
+       펴지는 것까지 반영한 실제 보이는 높이 기준으로 재계산된다. */
     max-height: calc(100vh - 72px - 24px);
+    max-height: calc(100dvh - 72px - 24px);
+    /* 바깥 박스 자체는 더 이상 스크롤하지 않는다 — 스크롤은 아래 body 영역 전용. */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 이미지+본문을 담는 실제 스크롤 영역. flex:1 1 auto + min-height:0 조합이
+     있어야 부모의 max-height 제약 안에서 실제로 줄어들며 스크롤이 생긴다. */
+  .notice-popup-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 하단 버튼 영역은 줄어들지 않고 항상 팝업 안에 고정 노출된다. */
+  .notice-popup-actions {
+    flex-shrink: 0;
   }
 }
 
