@@ -185,9 +185,9 @@ const views = {
 let state = { categories: [], products: [], faqs: [], reviews: [], notices: [] };
 
 // 이번 세션에서 선택 후 최적화까지 끝낸 파일(모달별). 저장 시 업로드 대상입니다.
-const pendingImageFile = { productModal: null, reviewModal: null };
+const pendingImageFile = { productModal: null, reviewModal: null, noticeModal: null };
 // 미리보기에 사용 중인 Object URL(모달별). 정리 대상 추적용입니다.
-const previewObjectUrls = { productModal: null, reviewModal: null };
+const previewObjectUrls = { productModal: null, reviewModal: null, noticeModal: null };
 
 function revokePreviewUrl(modalKey) {
   if (previewObjectUrls[modalKey]) {
@@ -279,6 +279,8 @@ function bindStaticEvents() {
 
   document.getElementById('addNoticeBtn').addEventListener('click', () => openNoticeModal());
   document.getElementById('noticeForm').addEventListener('submit', onNoticeSubmit);
+  document.getElementById('noticeImageFile').addEventListener('change', (e) => onImageFileChange(e, 'noticeImagePreview', 'noticeImageRemoveBtn', 'noticeModal'));
+  document.getElementById('noticeImageRemoveBtn').addEventListener('click', () => onImageRemoveClick('noticeModal', 'noticeImageFile', 'noticeImagePreview', 'noticeImageRemoveBtn'));
 
   document.getElementById('backupBtn').addEventListener('click', onBackupClick);
 
@@ -369,8 +371,10 @@ function closeModals(force) {
 
   revokePreviewUrl('productModal');
   revokePreviewUrl('reviewModal');
+  revokePreviewUrl('noticeModal');
   pendingImageFile.productModal = null;
   pendingImageFile.reviewModal = null;
+  pendingImageFile.noticeModal = null;
 
   if (modalLastFocus) {
     modalLastFocus.focus();
@@ -1294,7 +1298,7 @@ function renderNoticeAdminList() {
         <strong>${escapeHtml(notice.title)}</strong>
         <span class="admin-row-sub">
           ${escapeHtml(NOTICE_TYPE_LABELS[notice.notice_type] || notice.notice_type)} ·
-          ${notice.published ? '공개' : '비공개'}${notice.pinned ? ' · 상단 고정' : ''}${notice.popup_enabled ? ' · 팝업' : ''} · 순서 ${notice.sort_order}<br>
+          ${notice.published ? '공개' : '비공개'}${notice.pinned ? ' · 상단 고정' : ''}${notice.popup_enabled ? ' · 팝업' : ''}${notice.image_url ? ' · 사진' : ''} · 순서 ${notice.sort_order}<br>
           게시 기간: ${formatNoticeDate(notice.starts_at)} ~ ${formatNoticeDate(notice.ends_at)}
         </span>
       </div>
@@ -1330,7 +1334,28 @@ function openNoticeModal(id) {
   document.getElementById('noticeStartsAt').value = notice ? isoToDatetimeLocal(notice.starts_at) : '';
   document.getElementById('noticeEndsAt').value = notice ? isoToDatetimeLocal(notice.ends_at) : '';
   document.getElementById('noticeSortOrder').value = notice ? notice.sort_order : state.notices.length;
+  document.getElementById('noticeImageFile').value = '';
   hideFormError(document.getElementById('noticeFormError'));
+
+  revokePreviewUrl('noticeModal');
+  pendingImageFile.noticeModal = null;
+
+  const preview = document.getElementById('noticeImagePreview');
+  const removeBtn = document.getElementById('noticeImageRemoveBtn');
+  if (notice && notice.image_url) {
+    preview.src = notice.image_url;
+    preview.hidden = false;
+    removeBtn.hidden = false;
+  } else {
+    preview.hidden = true;
+    preview.removeAttribute('src');
+    removeBtn.hidden = true;
+  }
+
+  modal.dataset.currentImageUrl = (notice && notice.image_url) || '';
+  // 저장 시 이전 Storage 파일을 지우려면, "이미지 삭제" 버튼으로 currentImageUrl이
+  // 비워져도 원래 값을 알 수 있어야 한다 — 모달을 여는 시점에만 고정해둔다.
+  modal.dataset.originalImageUrl = (notice && notice.image_url) || '';
   openModal(modal);
 }
 
@@ -1363,8 +1388,22 @@ async function onNoticeSubmit(e) {
   saveBtn.disabled = true;
   saveBtn.textContent = '저장 중...';
 
+  let newUploadedUrl = null;
+  // DB insert/update가 실제로 성공했는지 별도로 추적한다. deleteStorageImage는
+  // 더 이상 throw하지 않지만, 혹시 이 시점 이후 다른 예외가 나더라도 이미
+  // 저장에 성공한 새 이미지를 "실패 정리" 경로에서 실수로 지우지 않기 위함.
+  let dbSaveSucceeded = false;
   try {
     const id = document.getElementById('noticeId').value;
+
+    const originalImageUrl = document.getElementById('noticeModal').dataset.originalImageUrl || '';
+    let imageUrl = document.getElementById('noticeModal').dataset.currentImageUrl || '';
+    const pendingFile = pendingImageFile.noticeModal;
+    if (pendingFile) {
+      imageUrl = await uploadImage(pendingFile);
+      newUploadedUrl = imageUrl;
+    }
+
     const payload = {
       title,
       content,
@@ -1375,6 +1414,7 @@ async function onNoticeSubmit(e) {
       starts_at: startsAt,
       ends_at: endsAt,
       sort_order: Number(document.getElementById('noticeSortOrder').value) || 0,
+      image_url: imageUrl || null,
     };
 
     const query = id
@@ -1383,12 +1423,40 @@ async function onNoticeSubmit(e) {
 
     const { error } = await query;
     if (error) throw error;
+    dbSaveSucceeded = true;
+
+    let cleanupWarning = false;
+    if (originalImageUrl && originalImageUrl !== imageUrl) {
+      const ok = await deleteStorageImage(originalImageUrl);
+      if (!ok) cleanupWarning = true;
+    }
 
     closeModals(true);
-    setStatus('공지사항을 저장했어요.');
+    setStatus(cleanupWarning ? '공지사항을 저장했지만 이전 이미지 정리에 실패했습니다.' : '공지사항을 저장했어요.', cleanupWarning);
     loadDashboard();
   } catch (err) {
-    showFormError(errEl, '저장 실패: ' + err.message);
+    if (dbSaveSucceeded) {
+      // DB 저장 자체는 성공한 뒤에 발생한 예외다 — 새로 올린 이미지는 이미
+      // 저장된 값이므로 여기서 지우면 안 된다. "저장 실패"로 잘못 안내하지도 않는다.
+      console.warn('공지사항 저장 후 처리 중 오류:', err);
+      closeModals(true);
+      setStatus('공지사항을 저장했지만 이후 처리 중 문제가 발생했습니다: ' + err.message, true);
+      loadDashboard();
+    } else {
+      // DB 저장이 실패했다면, 이번 라운드에 새로 업로드한 파일만 정리한다.
+      // 기존에 있던 이미지는 절대 건드리지 않는다.
+      if (newUploadedUrl) {
+        const cleanedUp = await deleteStorageImage(newUploadedUrl);
+        if (!cleanedUp) {
+          console.warn('신규 업로드 이미지 정리 실패:', newUploadedUrl);
+          showFormError(errEl, '데이터 저장에 실패했고 업로드된 이미지 정리도 완료하지 못했습니다. Storage를 확인해주세요.');
+          saveBtn.disabled = false;
+          saveBtn.textContent = '저장';
+          return;
+        }
+      }
+      showFormError(errEl, '저장 실패: ' + err.message);
+    }
   } finally {
     saveBtn.disabled = false;
     saveBtn.textContent = '저장';
@@ -1407,7 +1475,12 @@ async function deleteNotice(id) {
       setStatus('공지사항 삭제 실패: ' + error.message, true);
       return;
     }
-    setStatus('공지사항을 삭제했어요.');
+    let cleanupWarning = false;
+    if (notice && notice.image_url) {
+      const ok = await deleteStorageImage(notice.image_url);
+      if (!ok) cleanupWarning = true;
+    }
+    setStatus(cleanupWarning ? '데이터는 삭제됐지만 이미지 정리에 실패했습니다.' : '공지사항을 삭제했어요.', cleanupWarning);
     loadDashboard();
   } finally {
     deleteInProgress.delete(id);

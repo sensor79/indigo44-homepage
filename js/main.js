@@ -482,6 +482,17 @@ function initNoticeAccordion() {
       // 긴 공지 본문이 고정 max-height에 잘리지 않도록, 실제 콘텐츠 높이
       // (scrollHeight)를 읽어 그만큼만 펼칩니다.
       answer.style.maxHeight = answer.scrollHeight + 'px';
+
+      // 공지 이미지가 아직 로드되기 전이면 scrollHeight가 실제보다 작게
+      // 잡혀 이미지 로드 후 내용이 잘릴 수 있어, 로드 완료 시 다시 잽니다.
+      const img = answer.querySelector('.notice-answer-image img');
+      if (img && !img.complete) {
+        img.addEventListener('load', () => {
+          if (item.classList.contains('open')) {
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+          }
+        }, { once: true });
+      }
     }
   });
 }
@@ -562,6 +573,11 @@ function renderNoticeList(section, visible) {
   listEl.innerHTML = visible.map((notice, i) => {
     const typeLabel = NOTICE_TYPE_LABELS[notice.notice_type] || '일반';
     const dateLabel = formatNoticeDate(notice.created_at);
+    // image_url 컬럼이 아직 없는 응답(마이그레이션 전)에서도 notice.image_url은
+    // undefined일 뿐이라 안전하게 이미지 없이 렌더링됩니다.
+    const imageHtml = notice.image_url ? `
+      <div class="notice-answer-image"><img src="${escapeHtml(notice.image_url)}" alt="${escapeHtml(notice.title)} 공지 이미지" loading="lazy" onerror="this.parentElement.hidden=true"></div>
+    ` : '';
     return `
       <div class="notice-item">
         <h3 class="notice-item-heading">
@@ -574,7 +590,7 @@ function renderNoticeList(section, visible) {
             <span class="plus">+</span>
           </button>
         </h3>
-        <div class="notice-answer" id="noticeAnswer-${i}" aria-hidden="true"><p>${escapeHtml(notice.content)}</p></div>
+        <div class="notice-answer" id="noticeAnswer-${i}" aria-hidden="true">${imageHtml}<p>${escapeHtml(notice.content)}</p></div>
       </div>
     `;
   }).join('');
@@ -636,6 +652,24 @@ function openNoticePopup(notice) {
   // css의 white-space: pre-line이 살려줍니다(저장형 XSS 방지).
   document.getElementById('noticePopupContent').textContent = notice.content || '';
   popup.dataset.noticeId = notice.id;
+
+  // src를 DOM 프로퍼티로 직접 대입하므로(innerHTML 아님) 별도 escapeHtml 없이도
+  // 안전합니다. image_url 컬럼이 없는 응답에서는 notice.image_url이 undefined라
+  // 자동으로 이미지 없이 처리됩니다.
+  const imageWrap = document.getElementById('noticePopupImageWrap');
+  const image = document.getElementById('noticePopupImage');
+  if (imageWrap && image) {
+    if (notice.image_url) {
+      image.onerror = () => { imageWrap.hidden = true; };
+      image.alt = (notice.title || '공지') + ' 이미지';
+      image.src = notice.image_url;
+      imageWrap.hidden = false;
+    } else {
+      image.onerror = null;
+      image.removeAttribute('src');
+      imageWrap.hidden = true;
+    }
+  }
 
   noticePopupLastFocus = document.activeElement;
   popup.hidden = false;
