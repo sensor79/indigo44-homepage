@@ -4,7 +4,8 @@ const CERT_LABELS = {
   vegan: '비건 인증',
   'skin-test': '피부자극 테스트 인증',
   'heavy-metal-free': '무중금속 인증',
-  antibacterial: '항균테스트 인증'
+  antibacterial: '항균테스트 인증',
+  'mild-acidic': '약산성'
 };
 
 const PRODUCT_STATUS_LABELS = {
@@ -806,6 +807,7 @@ function openProductModal(id) {
   document.getElementById('certSkinTest').checked = certs.includes('skin-test');
   document.getElementById('certHeavyMetalFree').checked = certs.includes('heavy-metal-free');
   document.getElementById('certAntibacterial').checked = certs.includes('antibacterial');
+  document.getElementById('certMildAcidic').checked = certs.includes('mild-acidic');
 
   revokePreviewUrl('productModal');
   pendingImageFile.productModal = null;
@@ -907,6 +909,7 @@ async function onProductSubmit(e) {
     if (document.getElementById('certSkinTest').checked) certifications.push('skin-test');
     if (document.getElementById('certHeavyMetalFree').checked) certifications.push('heavy-metal-free');
     if (document.getElementById('certAntibacterial').checked) certifications.push('antibacterial');
+    if (document.getElementById('certMildAcidic').checked) certifications.push('mild-acidic');
 
     const payload = {
       category_id: document.getElementById('productCategoryId').value,

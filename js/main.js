@@ -4,7 +4,8 @@ const CERT_LABELS = {
   vegan: '비건 인증',
   'skin-test': '피부자극 테스트 인증',
   'heavy-metal-free': '무중금속 인증',
-  antibacterial: '항균테스트 인증'
+  antibacterial: '항균테스트 인증',
+  'mild-acidic': '약산성'
 };
 
 // 관리자 입력값(제품·FAQ·후기)을 innerHTML로 렌더링하기 전 이스케이프합니다.
