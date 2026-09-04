@@ -639,8 +639,8 @@ function dismissNoticePopupForToday(noticeId) {
   }
 }
 
-let noticePopupLastFocus = null;
-
+// 비차단형 알림이라 배경 스크롤 잠금·포커스 강제 이동·포커스 트랩을 두지 않습니다.
+// 홈페이지의 다른 내비게이션·버튼·스크롤은 팝업이 떠 있어도 항상 그대로 동작해야 합니다.
 function openNoticePopup(notice) {
   const popup = document.getElementById('noticePopup');
   if (!popup) return;
@@ -671,28 +671,13 @@ function openNoticePopup(notice) {
     }
   }
 
-  noticePopupLastFocus = document.activeElement;
   popup.hidden = false;
-  document.body.style.overflow = 'hidden';
-  popup.querySelector('.notice-popup-close').focus();
 }
 
 function closeNoticePopup() {
   const popup = document.getElementById('noticePopup');
   if (!popup || popup.hidden) return;
   popup.hidden = true;
-  document.body.style.overflow = '';
-
-  // 팝업이 페이지 진입과 동시에 자동으로 열렸다면(사용자가 직접 클릭한 게 아니라면)
-  // 열기 전 포커스는 body였을 것이다. <body>는 focus()를 호출해도 포커스를
-  // 옮겨주지 않는(비-focusable) 요소라서, 그 경우엔 현재 포커스(숨겨질 팝업
-  // 안의 버튼)를 그냥 blur해 포커스를 body로 자연스럽게 되돌린다.
-  if (noticePopupLastFocus && noticePopupLastFocus !== document.body && document.body.contains(noticePopupLastFocus)) {
-    noticePopupLastFocus.focus();
-  } else if (document.activeElement && document.activeElement !== document.body) {
-    document.activeElement.blur();
-  }
-  noticePopupLastFocus = null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -700,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!popup) return;
 
   popup.addEventListener('click', (e) => {
-    if (e.target === popup || e.target.closest('[data-close-notice-popup]')) {
+    if (e.target.closest('[data-close-notice-popup]')) {
       closeNoticePopup();
     }
   });
@@ -716,22 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', (e) => {
     if (popup.hidden) return;
-    if (e.key === 'Escape') {
-      closeNoticePopup();
-      return;
-    }
-    if (e.key === 'Tab') {
-      const focusable = Array.from(popup.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
+    if (e.key === 'Escape') closeNoticePopup();
   });
 });

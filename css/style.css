@@ -961,29 +961,24 @@ section { padding: 110px 0; }
   border: 1px solid var(--color-border);
 }
 
-/* ===== 공지 팝업 ===== */
+/* ===== 공지 팝업 (비차단형 좌상단 알림) =====
+   전체 화면을 덮는 오버레이가 없습니다 — 팝업 박스 자체만 뷰포트 좌상단에
+   고정 배치되고, 그 밖의 모든 영역(배경 스크롤·클릭)은 평소와 동일하게
+   동작합니다. */
 .notice-popup[hidden] { display: none !important; }
 
 .notice-popup {
   position: fixed;
-  inset: 0;
+  left: 24px;
+  top: calc(72px + 16px); /* 72px = .site-header .container 높이(헤더와 안 겹치게) */
   z-index: 400;
-  background: rgba(36, 38, 29, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.notice-popup-box {
-  position: relative;
+  width: min(380px, calc(100vw - 48px));
+  max-height: calc(100vh - 72px - 32px);
+  overflow-y: auto;
   background: var(--color-paper);
   border: 1px solid var(--color-border);
   border-radius: 2px;
-  width: 100%;
-  max-width: 440px;
-  max-height: 86vh;
-  overflow-y: auto;
+  box-shadow: var(--shadow-soft);
 }
 
 .notice-popup-close {
@@ -1044,6 +1039,16 @@ section { padding: 110px 0; }
   justify-content: space-between;
   gap: 12px;
   padding: 20px 32px 28px;
+}
+
+@media (max-width: 720px) {
+  .notice-popup {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    top: calc(72px + 12px);
+    max-height: calc(100vh - 72px - 24px);
+  }
 }
 
 /* ===== Footer ===== */

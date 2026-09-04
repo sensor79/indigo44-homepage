@@ -49,7 +49,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=38">
+<link rel="stylesheet" href="css/style.css?v=39">
 </head>
 <body>
 
@@ -321,25 +321,24 @@
   </div>
 </div>
 
-<!-- 공지/이벤트 팝업 -->
-<div id="noticePopup" class="notice-popup" hidden>
-  <div class="notice-popup-box" role="dialog" aria-modal="true" aria-labelledby="noticePopupTitle">
-    <button type="button" class="notice-popup-close" data-close-notice-popup aria-label="닫기">&times;</button>
-    <div class="notice-popup-body">
-      <p id="noticePopupType" class="notice-popup-type"></p>
-      <h3 id="noticePopupTitle" class="notice-popup-title"></h3>
-      <div id="noticePopupImageWrap" class="notice-popup-image" hidden>
-        <img id="noticePopupImage" alt="">
-      </div>
-      <p id="noticePopupContent" class="notice-popup-content"></p>
+<!-- 공지/이벤트 팝업: 비차단형 알림 — 화면을 덮지 않고 좌상단에 떠 있으며,
+     배경 클릭·스크롤·다른 요소 클릭을 막지 않습니다(전체 화면 오버레이 없음). -->
+<div id="noticePopup" class="notice-popup" role="dialog" aria-labelledby="noticePopupTitle" hidden>
+  <button type="button" class="notice-popup-close" data-close-notice-popup aria-label="닫기">&times;</button>
+  <div class="notice-popup-body">
+    <p id="noticePopupType" class="notice-popup-type"></p>
+    <h3 id="noticePopupTitle" class="notice-popup-title"></h3>
+    <div id="noticePopupImageWrap" class="notice-popup-image" hidden>
+      <img id="noticePopupImage" alt="">
     </div>
-    <div class="notice-popup-actions">
-      <button type="button" class="btn btn-outline btn-sm" data-hide-notice-popup-today>오늘 하루 보지 않기</button>
-      <button type="button" class="btn btn-primary btn-sm" data-close-notice-popup>닫기</button>
-    </div>
+    <p id="noticePopupContent" class="notice-popup-content"></p>
+  </div>
+  <div class="notice-popup-actions">
+    <button type="button" class="btn btn-outline btn-sm" data-hide-notice-popup-today>오늘 하루 보지 않기</button>
+    <button type="button" class="btn btn-primary btn-sm" data-close-notice-popup>닫기</button>
   </div>
 </div>
 
-<script src="js/main.js?v=15"></script>
+<script src="js/main.js?v=16"></script>
 </body>
 </html>
