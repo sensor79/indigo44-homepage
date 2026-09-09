@@ -586,7 +586,9 @@ function renderNoticeList(section, visible) {
               ${notice.notice_type === 'important' ? '<span class="notice-important">중요</span>' : ''}
               ${escapeHtml(notice.title)}
             </span>
-            <span class="notice-meta">${escapeHtml(typeLabel)}${dateLabel ? ' · ' + dateLabel : ''}</span>
+            <span class="notice-meta">
+              <span class="notice-type">${escapeHtml(typeLabel)}</span>${dateLabel ? `<span class="notice-date">${escapeHtml(dateLabel)}</span>` : ''}
+            </span>
             <span class="plus">+</span>
           </button>
         </h3>
