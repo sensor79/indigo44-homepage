@@ -870,7 +870,7 @@ section { padding: 110px 0; }
 }
 
 /* ===== Notices ===== */
-.notices { background: var(--color-paper); }
+.notices { background: var(--color-paper); border-bottom: 1px solid var(--color-border); }
 
 .notice-list { max-width: 760px; margin: 0 auto; }
 
