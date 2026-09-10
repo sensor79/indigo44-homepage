@@ -509,6 +509,97 @@ function formatNoticeDate(iso) {
 // notices 테이블 조회 실패(테이블 미생성 포함)·공지 0건·날짜 손상 등 어떤
 // 경우에도 홈페이지에는 오류 화면 대신 섹션을 조용히 숨깁니다. 다른 섹션
 // (제품·FAQ·후기) 로딩과는 완전히 독립적으로 동작합니다.
+//
+// published(공지 목록 공개)와 popup_enabled(팝업 표시)는 서로 독립적인 값이라
+// published=false여도 popup_enabled=true면 팝업 전용으로 노출되어야 합니다.
+// 그래서 목록용/팝업용 쿼리를 아예 분리해서 각자 필요한 조건(published=true
+// 또는 popup_enabled=true)과 게시 기간을 쿼리 단계에서부터 겁니다. 이렇게
+// 나누는 이유는 두 가지입니다.
+//   1) 한쪽 공지가 많아 조회 한도(limit)를 다 채우면 다른 쪽 공지가
+//      누락되는 문제를 원천적으로 없앱니다 — 각자 자기 몫만 조회하므로.
+//   2) 로그인한 관리자가 같은 브라우저로 메인 페이지를 볼 때(관리자 세션이
+//      남아 있으면 RLS가 비공개·기간 밖 공지까지 허용합니다), 쿼리 자체가
+//      표시 조건을 걸고 있어서 그런 공지가 조회 결과에 섞이지도, 조회
+//      한도를 소모하지도 않습니다.
+// (RLS 정책도 published=true 또는 popup_enabled=true 중 하나만 만족하면
+// 조회를 허용하도록 맞춰져 있어야 합니다 — sql/ 폴더 참고.)
+//
+// 목록은 항상 상위 5개(renderNoticeList가 slice(0,5))만, 팝업은 항상 최우선
+// 순위 1개(showNoticePopupIfEligible이 첫 항목)만 실제로 쓰므로, 날짜 값이
+// 깨진 행을 filterNoticesWithValidDates가 걸러내는 극히 드문 경우를 대비한
+// 최소한의 여유만 둡니다(실제 필요 개수의 2~3배 정도).
+const NOTICE_LIST_QUERY_LIMIT = 15;
+const NOTICE_POPUP_QUERY_LIMIT = 8;
+
+// 정렬 우선순위(pinned → sort_order → 최신 생성)와 게시 기간(starts_at/ends_at)
+// 조건을 목록·팝업 쿼리에 동일하게 적용하기 위한 공통 빌더.
+function applyNoticeQueryFilters(query, nowIso) {
+  return query
+    .or(`starts_at.is.null,starts_at.lte.${nowIso}`)
+    .or(`ends_at.is.null,ends_at.gte.${nowIso}`)
+    .order('pinned', { ascending: false })
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+}
+
+// RLS·쿼리 조건이 게시 기간을 이미 걸러주지만, 날짜 값이 깨져 있을 가능성까지
+// 고려해 클라이언트에서도 한 번 더 검증합니다. nowMs를 loadNotices에서 한 번
+// 계산해 넘겨받아 쓰므로, 목록·팝업 요청이 서로 다른 시점에 응답으로 와도
+// (병렬 실행이라 도착 시각이 다를 수 있음) 동일한 기준 시각으로 평가됩니다.
+function filterNoticesWithValidDates(rows, nowMs) {
+  return rows.filter(n => {
+    if (n.starts_at) {
+      if (!isValidDateValue(n.starts_at)) return false;
+      if (new Date(n.starts_at).getTime() > nowMs) return false;
+    }
+    if (n.ends_at) {
+      if (!isValidDateValue(n.ends_at)) return false;
+      if (new Date(n.ends_at).getTime() < nowMs) return false;
+    }
+    return true;
+  });
+}
+
+// column(published 또는 popup_enabled)=true이면서 게시 기간 안인 공지를
+// 우선순위대로 조회합니다. 목록·팝업 쿼리가 이 공통 로직만 공유하고, 실패
+// 시 어떻게 반응할지(렌더링/숨김 vs 그냥 무시)는 각 호출부가 따로 정합니다.
+async function fetchActiveNotices(column, limit, nowIso, nowMs) {
+  const { data, error } = await applyNoticeQueryFilters(
+    supabaseClient.from('site_notices').select('*').eq(column, true),
+    nowIso
+  ).limit(limit);
+  if (error) throw error;
+  return filterNoticesWithValidDates(data || [], nowMs);
+}
+
+// 공지 목록(published=true) 조회·렌더링. 팝업 조회와 나란히 실행되며, 이
+// 함수 내부의 지연이나 오류가 팝업 쪽 타이밍에 전혀 영향을 주지 않습니다.
+async function loadNoticeList(section, nowIso, nowMs) {
+  try {
+    const rows = await fetchActiveNotices('published', NOTICE_LIST_QUERY_LIMIT, nowIso, nowMs);
+    renderNoticeList(section, rows.slice(0, 5));
+  } catch (err) {
+    console.warn('공지 목록을 불러오지 못했습니다.', err);
+    if (section) section.hidden = true;
+  }
+}
+
+// 팝업(popup_enabled=true) 조회·표시. 목록 조회와 나란히 실행되며, 이 함수
+// 내부의 지연이나 오류가 목록 쪽 타이밍에 전혀 영향을 주지 않습니다.
+async function loadNoticePopup(nowIso, nowMs) {
+  try {
+    const rows = await fetchActiveNotices('popup_enabled', NOTICE_POPUP_QUERY_LIMIT, nowIso, nowMs);
+    showNoticePopupIfEligible(rows);
+  } catch (err) {
+    console.warn('공지 팝업을 표시하지 못했습니다.', err);
+  }
+}
+
+// 다른 섹션 로더(loadProducts/loadFaqs/loadReviews)와 같은 방식으로, 두
+// 요청을 그냥 나란히 fire-and-forget으로 시작합니다. 서로 await로 연결하지
+// 않으므로 한쪽이 느리거나 실패해도 다른 쪽 시작·표시가 전혀 늦어지지
+// 않습니다. loadNoticeList/loadNoticePopup은 내부에서 모든 에러를 직접
+// 처리하므로 여기서 별도로 잡을 것이 없습니다.
 async function loadNotices() {
   const section = document.getElementById('notices');
 
@@ -517,48 +608,12 @@ async function loadNotices() {
     return;
   }
 
-  let rows = [];
-  try {
-    const { data, error } = await supabaseClient
-      .from('site_notices')
-      .select('*')
-      .eq('published', true)
-      .order('pinned', { ascending: false })
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false })
-      .limit(100);
-    if (error) throw error;
-    rows = data || [];
-  } catch (err) {
-    console.warn('공지사항을 불러오지 못했습니다.', err);
-    if (section) section.hidden = true;
-    return;
-  }
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const nowMs = now.getTime();
 
-  const now = Date.now();
-  const visible = rows.filter(n => {
-    // RLS가 게시 기간을 이미 걸러주지만, 날짜 값이 깨져 있을 가능성까지
-    // 고려해 클라이언트에서도 한 번 더 검증합니다.
-    if (n.starts_at) {
-      if (!isValidDateValue(n.starts_at)) return false;
-      if (new Date(n.starts_at).getTime() > now) return false;
-    }
-    if (n.ends_at) {
-      if (!isValidDateValue(n.ends_at)) return false;
-      if (new Date(n.ends_at).getTime() < now) return false;
-    }
-    return true;
-  });
-
-  renderNoticeList(section, visible.slice(0, 5));
-
-  // 팝업 노출은 하단 공지 목록과 완전히 독립적으로 처리합니다. 여기서 오류가
-  // 나도 위에서 이미 렌더링된 공지 목록·다른 섹션에는 영향을 주지 않습니다.
-  try {
-    showNoticePopupIfEligible(visible);
-  } catch (err) {
-    console.warn('공지 팝업을 표시하지 못했습니다.', err);
-  }
+  loadNoticeList(section, nowIso, nowMs);
+  loadNoticePopup(nowIso, nowMs);
 }
 
 function renderNoticeList(section, visible) {
@@ -603,15 +658,14 @@ function renderNoticeList(section, visible) {
 
 // ===== 공지 팝업 =====
 // 우선순위(pinned → sort_order → 최신 생성)는 loadNotices의 쿼리 정렬 순서를
-// 그대로 물려받습니다. visible은 이미 그 순서로 정렬돼 있으므로, popup_enabled가
-// true인 첫 항목이 곧 최우선 순위 항목입니다.
+// 그대로 물려받습니다. popupNotices는 이미 그 순서로 정렬된, popup_enabled=true
+// 항목만 모은 목록이므로 첫 항목이 곧 최우선 순위 항목입니다. 공지 목록(published)
+// 노출 여부와는 무관하게 결정됩니다.
 const NOTICE_POPUP_DISMISS_PREFIX = 'indigo44_notice_popup_dismiss_';
 
-function showNoticePopupIfEligible(visibleNotices) {
-  // popup_enabled 컬럼이 아직 없는 오래된 응답(마이그레이션 전)도 false로
-  // 간주해 안전하게 처리합니다.
-  const popupNotice = visibleNotices.find(n => n && n.popup_enabled === true);
-  if (!popupNotice || !popupNotice.id) return;
+function showNoticePopupIfEligible(popupNotices) {
+  const popupNotice = popupNotices.find(n => n && n.id);
+  if (!popupNotice) return;
   if (isNoticePopupDismissedToday(popupNotice.id)) return;
   openNoticePopup(popupNotice);
 }
